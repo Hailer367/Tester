@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "@/components/wallet/wallet-provider";
+import { WalletButton } from "@/components/wallet/wallet-button";
 import { ChatSystem } from "@/components/chat/chat-system";
 import { LeaderboardWidget } from "@/components/leaderboard/leaderboard-widget";
 import { GameLobby } from "@/components/games/game-lobby";
@@ -117,6 +118,7 @@ export default function Home() {
 
           {/* Wallet Connection Area */}
           <div className="flex items-center space-x-4">
+            <WalletButton />
             <Button 
               onClick={() => setActiveView("settings")}
               variant="ghost"
@@ -141,10 +143,7 @@ export default function Home() {
           
           {!connected && (
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="bg-gradient-to-r from-[var(--gold)] to-yellow-400 text-[var(--midnight)] px-8 py-4 rounded-lg font-bold text-lg hover:shadow-lg hover:shadow-[var(--gold)]/50 transform hover:scale-105 transition-all duration-300">
-                <i className="fas fa-dice mr-2"></i>
-                Start Playing
-              </button>
+              <WalletButton />
               <button className="glass-morphism text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/10 transition-all duration-300">
                 <i className="fas fa-chart-line mr-2"></i>
                 View Stats

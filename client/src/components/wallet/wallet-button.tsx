@@ -1,159 +1,172 @@
 import { useState } from "react";
-import React from "react";
 import { useWallet } from "./wallet-provider";
-import { WalletModal } from "./wallet-modal";
-import { UsernameModal } from "./username-modal";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { isAuthorizedAdmin } from "@/lib/admin-utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { formatWalletAddress, formatSOLAmount } from "@/lib/wallet-utils";
+import { useToast } from "@/hooks/use-toast";
 
 export function WalletButton() {
-  const { connected, connecting, user, publicKey, solBalance, disconnect } = useWallet();
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [showUsernameModal, setShowUsernameModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { connected, connecting, publicKey, user, solBalance, connect, disconnect } = useWallet();
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
-  // Check if user is admin
-  React.useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user?.walletAddress) {
-        const adminStatus = await isAuthorizedAdmin(user.walletAddress);
-        setIsAdmin(adminStatus);
-      }
-    };
-    checkAdminStatus();
-  }, [user]);
+  const handleConnect = async (walletType: string) => {
+    try {
+      await connect(walletType);
+      setIsOpen(false);
+      toast({
+        title: "Wallet Connected",
+        description: "Successfully connected to your Solana wallet!",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: error instanceof Error ? error.message : "Failed to connect wallet",
+        variant: "destructive",
+      });
+    }
+  };
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  const handleDisconnect = () => {
+    disconnect();
+    toast({
+      title: "Wallet Disconnected",
+      description: "Your wallet has been disconnected.",
+    });
   };
 
   if (connected && user) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="glass-morphism rounded-lg px-4 py-2 flex items-center space-x-3 hover:bg-white/10 transition-all duration-300 group">
-            {/* User Avatar */}
-            <div className="relative">
-              <div 
-                className={`w-8 h-8 bg-gradient-to-br ${getUserGradient(user.profileColor)} rounded-full flex items-center justify-center text-[var(--midnight)] font-bold text-sm ${isAdmin ? 'border-2 border-[var(--gold)]' : ''}`}
-              >
-                {isAdmin ? <i className="fas fa-crown text-xs"></i> : user.avatar}
-              </div>
-              {isAdmin && (
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[var(--gold)] rounded-full flex items-center justify-center">
-                  <i className="fas fa-shield-alt text-[var(--midnight)] text-xs"></i>
-                </div>
-              )}
-            </div>
-            
-            {/* User Info */}
-            <div className="text-left">
-              <div className="text-sm font-medium text-white">{user.username}</div>
-              <div className="text-xs text-gray-400">{formatAddress(user.walletAddress)}</div>
-            </div>
-            
-            {/* SOL Balance */}
-            <div className="text-right">
-              <div className="text-sm font-semibold text-[var(--gold)]">{solBalance.toFixed(2)} SOL</div>
-              <div className="text-xs text-gray-400">Balance</div>
-            </div>
-            
-            <i className="fas fa-chevron-down text-gray-400 group-hover:text-white transition-colors duration-300"></i>
-          </button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent className="w-64 glass-morphism border-[var(--gold)]/30 bg-[var(--deep-purple)]/80 backdrop-blur-lg">
-          <div className="p-4 border-b border-white/10">
-            <div className="flex items-center space-x-3">
-              <div 
-                className={`w-12 h-12 bg-gradient-to-br ${getUserGradient(user.profileColor)} rounded-full flex items-center justify-center text-[var(--midnight)] font-bold`}
-              >
-                {user.avatar}
-              </div>
-              <div>
-                <div className="font-semibold text-white">{user.username}</div>
-                <div className="text-sm text-gray-400">{formatAddress(user.walletAddress)}</div>
-              </div>
-            </div>
+      <div className="flex items-center space-x-4">
+        {/* Balance Display */}
+        <div className="glass-morphism rounded-lg px-4 py-2 text-sm">
+          <div className="text-[var(--gold)] font-semibold">
+            {formatSOLAmount(solBalance)} SOL
           </div>
-          
-          <DropdownMenuItem className="hover:bg-white/10 focus:bg-white/10">
-            <i className="fas fa-user text-gray-400 mr-2"></i>
-            Profile Settings
-          </DropdownMenuItem>
-          
-          {isAdmin && (
-            <DropdownMenuItem className="hover:bg-[var(--gold)]/20 focus:bg-[var(--gold)]/20 text-[var(--gold)]">
-              <i className="fas fa-shield-alt mr-2"></i>
-              <a href="/admin" className="w-full">Admin Panel</a>
-            </DropdownMenuItem>
-          )}
-          
-          <DropdownMenuItem className="hover:bg-white/10 focus:bg-white/10">
-            <i className="fas fa-history text-gray-400 mr-2"></i>
-            Transaction History
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator className="bg-white/10" />
-          
-          <DropdownMenuItem 
-            className="hover:bg-red-500/20 focus:bg-red-500/20 text-red-400"
-            onClick={disconnect}
-          >
-            <i className="fas fa-sign-out-alt mr-2"></i>
-            Disconnect Wallet
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }
+        </div>
 
-  if (connected && !user) {
-    // User is connected but hasn't registered username
-    return (
-      <>
-        <Button 
-          onClick={() => setShowUsernameModal(true)}
-          className="bg-gradient-to-r from-[var(--gold)] to-yellow-400 text-[var(--midnight)] hover:shadow-lg hover:shadow-[var(--gold)]/50 animate-glow"
+        {/* User Info */}
+        <div className="glass-morphism rounded-lg px-4 py-2 text-sm">
+          <div className="text-white font-medium">{user.username}</div>
+          <div className="text-gray-400 text-xs">
+            {formatWalletAddress(publicKey?.toString() || "")}
+          </div>
+        </div>
+
+        {/* Disconnect Button */}
+        <Button
+          onClick={handleDisconnect}
+          variant="outline"
+          size="sm"
+          className="border-red-500/50 text-red-400 hover:bg-red-500/10"
         >
-          <i className="fas fa-user-edit mr-2"></i>
-          Complete Setup
+          <i className="fas fa-sign-out-alt mr-2"></i>
+          Disconnect
         </Button>
-        <UsernameModal 
-          isOpen={showUsernameModal} 
-          onClose={() => setShowUsernameModal(false)} 
-        />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Button
-        onClick={() => setShowWalletModal(true)}
-        disabled={connecting}
-        className="bg-gradient-to-r from-[var(--gold)] to-yellow-400 text-[var(--midnight)] px-6 py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-[var(--gold)]/50 transform hover:scale-105 transition-all duration-300 animate-glow"
-      >
-        <i className="fas fa-wallet mr-2"></i>
-        {connecting ? "Connecting..." : "Connect Wallet"}
-      </Button>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          className="bg-gradient-to-r from-[var(--gold)] to-yellow-400 text-[var(--midnight)] font-bold hover:shadow-lg hover:shadow-[var(--gold)]/50 transition-all duration-300"
+          disabled={connecting}
+        >
+          {connecting ? (
+            <>
+              <i className="fas fa-spinner fa-spin mr-2"></i>
+              Connecting...
+            </>
+          ) : (
+            <>
+              <i className="fas fa-wallet mr-2"></i>
+              Connect Wallet
+            </>
+          )}
+        </Button>
+      </DialogTrigger>
       
-      <WalletModal 
-        isOpen={showWalletModal} 
-        onClose={() => setShowWalletModal(false)} 
-      />
-    </>
-  );
-}
+      <DialogContent className="glass-morphism border-[var(--gold)]/20 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white text-center text-xl font-bold">
+            <i className="fas fa-wallet text-[var(--gold)] mr-3"></i>
+            Connect Your Wallet
+          </DialogTitle>
+          <p className="text-gray-400 text-center text-sm mt-2">
+            Choose your preferred Solana wallet to start playing
+          </p>
+        </DialogHeader>
 
-function getUserGradient(color: string) {
-  const gradients = {
-    purple: "from-purple-500 to-pink-500",
-    blue: "from-blue-500 to-cyan-500",
-    green: "from-green-500 to-emerald-500",
-    orange: "from-orange-500 to-red-500",
-    gold: "from-[var(--gold)] to-yellow-400"
-  };
-  return gradients[color as keyof typeof gradients] || gradients.purple;
+        <div className="space-y-4 mt-6">
+          {/* Phantom Wallet */}
+          <Button
+            onClick={() => handleConnect("phantom")}
+            className="w-full glass-morphism hover:bg-white/10 text-white justify-start h-16"
+            variant="ghost"
+            disabled={connecting}
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                <i className="fas fa-ghost text-white text-lg"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold">Phantom</div>
+                <div className="text-sm text-gray-400">Popular Solana wallet</div>
+              </div>
+            </div>
+          </Button>
+
+          {/* Solflare Wallet */}
+          <Button
+            onClick={() => handleConnect("solflare")}
+            className="w-full glass-morphism hover:bg-white/10 text-white justify-start h-16"
+            variant="ghost"
+            disabled={connecting}
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                <i className="fas fa-fire text-white text-lg"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold">Solflare</div>
+                <div className="text-sm text-gray-400">Secure & user-friendly</div>
+              </div>
+            </div>
+          </Button>
+
+          {/* Backpack Wallet */}
+          <Button
+            onClick={() => handleConnect("backpack")}
+            className="w-full glass-morphism hover:bg-white/10 text-white justify-start h-16"
+            variant="ghost"
+            disabled={connecting}
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+                <i className="fas fa-backpack text-white text-lg"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold">Backpack</div>
+                <div className="text-sm text-gray-400">Multi-chain wallet</div>
+              </div>
+            </div>
+          </Button>
+        </div>
+
+        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <i className="fas fa-info-circle text-blue-400 mt-0.5"></i>
+            <div className="text-sm text-blue-300">
+              <div className="font-semibold mb-1">New to Solana wallets?</div>
+              <div className="text-blue-400">
+                We recommend starting with Phantom - it's beginner-friendly and widely supported.
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
