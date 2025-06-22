@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(403).json({ message: 'Admin access required' });
     }
     
-    req.adminWallet = walletAddress;
+    (req as any).adminWallet = walletAddress;
     next();
   };
 
@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: banned ? 'ban_user' : 'unban_user',
         targetUser: user.username,
         details: `User ${banned ? 'banned' : 'unbanned'} by admin`
@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: muted ? 'mute_user' : 'unmute_user',
         targetUser: user.username,
         details: `User ${muted ? 'muted' : 'unmuted'} by admin`
@@ -290,7 +290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'adjust_balance',
         targetUser: user.username,
         details: `Balance adjusted by ${amount} SOL`
@@ -315,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'set_vouch',
         targetUser: user.username,
         details: `Vouch percentage set to ${percentage}%`
@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'update_settings',
         details: `Updated ${updatedSettings.length} settings`
       });
@@ -386,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'update_game_setting',
         details: `Updated ${gameType} game settings`
       });
@@ -416,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'add_fee_wallet',
         details: `Added fee wallet: ${walletData.walletName}`
       });
@@ -443,7 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'update_fee_wallet',
         details: `Updated fee wallet: ${wallet.walletName}`
       });
@@ -466,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'delete_fee_wallet',
         details: `Deleted fee wallet with ID: ${id}`
       });
@@ -500,7 +500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'manual_payout',
         targetUser: user.username,
         details: `Manual payout of ${amount} SOL. Reason: ${reason}`
@@ -524,7 +524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log admin action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'flag_user',
         targetUser: user.username,
         details: 'User flagged for suspicious activity'
@@ -544,12 +544,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This would typically reset specific leaderboard data
       // For now, just log the action
       await storage.createAuditLog({
-        adminWallet: req.adminWallet,
+        adminWallet: (req as any).adminWallet,
         action: 'reset_leaderboard',
         details: `Reset ${type} leaderboard`
       });
 
       res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Game Routes
+  
+  // Moon Flip game
+  app.post('/api/games/moon-flip', async (req, res) => {
+    try {
+      const { betAmount, selectedSide } = req.body;
+      const walletAddress = req.headers['x-wallet-address'];
+      
+      if (!walletAddress) {
+        return res.status(401).json({ message: 'Wallet address required' });
+      }
+
+      const user = await storage.getUserByWalletAddress(walletAddress as string);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const bet = parseFloat(betAmount);
+      const userBalance = parseFloat(user.solBalance || "0");
+      
+      if (bet > userBalance) {
+        return res.status(400).json({ message: 'Insufficient balance' });
+      }
+
+      // Simulate coin flip (50/50 chance)
+      const result = Math.random() < 0.5 ? "heads" : "tails";
+      const isWin = result === selectedSide;
+      const multiplier = 1.95; // 2x with 2.5% house edge
+      const winAmount = isWin ? bet * multiplier : 0;
+      const playingFee = isWin ? bet * 0.0001 : 0; // 0.01% fee only on wins
+      const netWinAmount = winAmount - playingFee;
+
+      // Update user balance
+      const newBalance = userBalance - bet + (isWin ? netWinAmount : 0);
+      await storage.updateUser(user.id, {
+        solBalance: newBalance.toString(),
+        totalWagered: (parseFloat(user.totalWagered || "0") + bet).toString(),
+        totalWon: (parseFloat(user.totalWon || "0") + (isWin ? netWinAmount : 0)).toString(),
+        currentStreak: isWin ? (user.currentStreak || 0) + 1 : 0,
+        maxStreak: isWin ? Math.max((user.maxStreak || 0), (user.currentStreak || 0) + 1) : user.maxStreak,
+        lastActivity: new Date()
+      });
+
+      // Record game stats
+      await storage.createGameStats({
+        userId: user.id,
+        gameType: "moon-flip",
+        betAmount: bet.toString(),
+        winAmount: (isWin ? netWinAmount : 0).toString(),
+        isWin
+      });
+
+      res.json({
+        result,
+        isWin,
+        betAmount: bet.toString(),
+        winAmount: (isWin ? netWinAmount : 0).toString(),
+        newBalance: newBalance.toString(),
+        playingFee: playingFee.toString()
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Snake & Ladder - Get rooms
+  app.get('/api/games/snake-ladder/rooms', async (req, res) => {
+    try {
+      // In a real implementation, this would fetch from game rooms storage
+      // For now, return mock data
+      res.json([]);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Snake & Ladder - Create room
+  app.post('/api/games/snake-ladder/create', async (req, res) => {
+    try {
+      const { roomName, betAmount } = req.body;
+      const walletAddress = req.headers['x-wallet-address'];
+      
+      if (!walletAddress) {
+        return res.status(401).json({ message: 'Wallet address required' });
+      }
+
+      const user = await storage.getUserByWalletAddress(walletAddress as string);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Mock room creation - in real implementation would store in database
+      const room = {
+        id: Date.now(),
+        roomName,
+        hostUser: user,
+        maxPlayers: 2,
+        currentPlayers: 1,
+        betAmount,
+        status: "waiting",
+        participants: [user]
+      };
+
+      res.json(room);
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
     }

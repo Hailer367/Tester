@@ -19,6 +19,9 @@ export const users = pgTable("users", {
   isBanned: boolean("is_banned").default(false),
   isMuted: boolean("is_muted").default(false),
   vouchPercentage: decimal("vouch_percentage", { precision: 5, scale: 2 }).default("0"),
+  activeGames: integer("active_games").default(0),
+  playerTitle: text("player_title"),
+  soundPack: text("sound_pack").default("night_ambience"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -75,6 +78,29 @@ export const gameStats = pgTable("game_stats", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+export const gameRooms = pgTable("game_rooms", {
+  id: serial("id").primaryKey(),
+  gameType: text("game_type").notNull(),
+  roomName: text("room_name").notNull(),
+  hostUserId: integer("host_user_id").references(() => users.id).notNull(),
+  maxPlayers: integer("max_players").default(2),
+  currentPlayers: integer("current_players").default(1),
+  betAmount: decimal("bet_amount", { precision: 18, scale: 9 }).notNull(),
+  status: text("status").default("waiting"), // waiting, playing, finished
+  gameData: text("game_data"), // JSON string for game state
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const gameParticipants = pgTable("game_participants", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").references(() => gameRooms.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  position: integer("position"), // for games like snake & ladder
+  isWinner: boolean("is_winner").default(false),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   walletAddress: true,
@@ -121,12 +147,30 @@ export const insertGameStatsSchema = createInsertSchema(gameStats).pick({
   isWin: true,
 });
 
+export const insertGameRoomSchema = createInsertSchema(gameRooms).pick({
+  gameType: true,
+  roomName: true,
+  hostUserId: true,
+  maxPlayers: true,
+  betAmount: true,
+});
+
+export const insertGameParticipantSchema = createInsertSchema(gameParticipants).pick({
+  roomId: true,
+  userId: true,
+  position: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertGameStats = z.infer<typeof insertGameStatsSchema>;
 export type GameStats = typeof gameStats.$inferSelect;
+export type InsertGameRoom = z.infer<typeof insertGameRoomSchema>;
+export type GameRoom = typeof gameRooms.$inferSelect;
+export type InsertGameParticipant = z.infer<typeof insertGameParticipantSchema>;
+export type GameParticipant = typeof gameParticipants.$inferSelect;
 export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InsertGameSetting = z.infer<typeof insertGameSettingSchema>;

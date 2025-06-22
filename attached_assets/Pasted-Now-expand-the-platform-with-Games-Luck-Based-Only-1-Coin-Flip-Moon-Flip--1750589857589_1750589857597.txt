@@ -1,0 +1,217 @@
+Now expand the platform with:
+
+
+---
+
+Games (Luck-Based Only)
+
+1.  Coin Flip ("Moon Flip")
+
+Animated, stylized Solana coin that flips with theme-matching visual FX
+
+Coin flip must be provably fair or randomness-based
+
+Include smooth 3D or bounce animation with glowing edge
+
+Play history, real-time outcome reveal, and toast alerts
+
+
+
+2.  Snake and Ladder
+
+Solo or PVP version, both luck-based (dice roll only)
+
+Beautiful, night-themed board (dark tones, glowing tiles)
+
+Animated dice roll with soft glow and spark
+
+Progress shown in real time with movement along board
+
+Fair randomness enforced, no skill component
+
+
+
+
+> Ensure all games are luck-based, not skill-based, to prevent cheating or script abuse.
+
+
+
+
+---
+
+Game Logic & Limits
+
+Users can create or join up to 3 games max at once
+
+Minimum bet: 0.001 SOL
+
+Fixed playing fee: 0.0001 SOL, charged only to the winner
+
+Playing fee is sent to a specific wallet address (admin-controlled)
+
+Admin can adjust:
+
+Minimum bet
+
+Playing fee
+
+Fee wallet destination
+
+
+
+
+---
+
+Player System Enhancements
+
+Add player match history:
+
+Game type, result, amount staked, win/loss, timestamp
+
+
+Add multiplayer lobby:
+
+List available games
+
+Filter by stake or game type
+
+Show # of online players
+
+Join open matches
+
+
+
+
+---
+
+Sound Packs (Mood-Based)
+
+Allow user to choose background sound pack:
+
+“Night Ambience” (wind, city)
+
+“Arcade Mode” (chimes, blips)
+
+“Mystery Fog” (low ambient hum)
+
+
+Toggle sound in settings
+
+Keep sound minimalist and immersive
+
+
+
+---
+
+Visuals & Animation Polish
+
+Fully responsive layout
+
+Floating animated particles in background (e.g. soft mist, stars)
+
+Animate all major elements (buttons, game results, leaderboard)
+
+Real-time toast notifications for wins, mentions, actions
+
+Particle cursor effects on hover
+
+Animate leaderboard badges (e.g. glowing crowns, flames for streaks)
+
+Use glass-style popups and gold-accented elements consistently
+
+
+
+---
+
+Chat + Social Features
+
+Global chat with anime-style UI
+
+Support for @mentions with highlighting
+
+Temporary user titles:
+
+“Lucky Streaker” (3+ wins)
+
+“Big Baller” (highest bet)
+
+“Shadow Winner” (quiet win streaks)
+
+
+Typing indicators and chat glow effects for mentioned users
+
+
+
+---
+
+‍ Admin Panel (Advanced Tools)
+
+Control:
+
+Fee amount
+
+Min bet
+
+Fee wallet assignment (wallet that receives collected fees)
+
+
+View:
+
+Fee collection summary (daily, weekly, all-time)
+
+Player stats (total staked, win/loss, last active)
+
+Game activity heatmaps
+
+Suspicious behavior logs (abnormal win rates, repeat patterns)
+
+
+Spectate live games
+
+Post site-wide banner announcements
+
+Create & manage promo codes (if backend supports it)
+
+Toggle maintenance mode per game
+
+Whitelist mode for restricted access
+
+Set seasonal visual themes (rain, sakura, snow)
+
+
+
+---
+
+Easter Eggs
+
+Add "Night Kitty" mascot that appears during high streaks
+
+Hidden graffiti animation on footer hover
+
+Mysterious glow/audio if user hovers lobby title
+
+
+
+---
+
+⚙️ Tech Requirements
+
+Use React + Tailwind CSS
+
+Modularize all React components (clean file structure)
+
+Optimize animations, images, and sounds
+
+Ensure full Vercel compatibility (for future deployment)
+
+Use secure Solana wallet connection via Wallet Adapter
+
+Auto-reconnect wallet on reload
+
+Never store private keys
+
+
+
+---
+
+> Expand the existing Nightfall Casino anime-themed gambling site with two additional luck-based games (Moon Flip and Snake and Ladder), advanced admin features, visual upgrades, fee logic, player limits, chat enhancements, and full theme consistency.

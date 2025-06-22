@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nightfall Casino is a full-stack web application built as a Solana-based gambling platform with real-time chat functionality. The application features a dark, night-themed UI and provides a casino gaming environment where users can connect their Solana wallets to participate in games and interact with other players.
+Nightfall Casino is a comprehensive Solana-based gambling platform featuring Call of the Night anime aesthetic. The platform includes two luck-based games (Moon Flip and Snake & Ladder), real-time chat, leaderboards, sound management, and a secure admin panel. Users connect Solana wallets to play games, with fees only charged to winners and comprehensive admin oversight for game management.
 
 ## System Architecture
 
@@ -72,11 +72,15 @@ The application is configured for deployment on Replit with the following setup:
 
 The deployment uses autoscale configuration and includes proper build steps for both client and server components.
 
-## Changelog
+## Recent Changes
 
 ```
-Changelog:
-- June 22, 2025. Initial setup
+Recent Changes:
+- June 22, 2025: Initial Solana wallet integration and admin panel setup
+- June 22, 2025: Added Moon Flip and Snake & Ladder games with lobby system
+- June 22, 2025: Implemented sound management system with multiple ambient packs
+- June 22, 2025: Enhanced UI with animated particles and Call of the Night aesthetic
+- June 22, 2025: Expanded admin panel with comprehensive user and game management
 ```
 
 ## User Preferences

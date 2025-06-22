@@ -121,6 +121,9 @@ export class MemStorage implements IStorage {
       isBanned: false,
       isMuted: false,
       vouchPercentage: "0",
+      activeGames: 0,
+      playerTitle: null,
+      soundPack: "night_ambience",
       createdAt: new Date(),
     };
     this.users.set(id, user);
