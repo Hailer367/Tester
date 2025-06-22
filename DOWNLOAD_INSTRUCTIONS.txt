@@ -1,0 +1,33 @@
+NIGHTFALL CASINO - COMPLETE PROJECT PACKAGE
+
+Archive File: nightfall-casino.tar.gz
+
+CONTENTS:
+- Complete React frontend with wallet integration
+- Express.js backend with WebSocket support
+- Two casino games (Moon Flip, Snake & Ladder)
+- Admin panel with comprehensive controls
+- Real-time chat and leaderboard systems
+- Call of the Night anime aesthetic design
+
+ADMIN CONFIGURATION:
+- Primary Admin Wallet: GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb
+- Fee Collection: 0.0001 SOL charged to winners only
+
+SETUP INSTRUCTIONS:
+1. Extract: tar -xzf nightfall-casino.tar.gz
+2. Install: npm install
+3. Run: npm run dev
+4. Access: http://localhost:5000
+
+FEATURES INCLUDED:
+✓ Multi-wallet support (Phantom, Solflare, Backpack)
+✓ Two fully functional casino games
+✓ Real-time chat and WebSocket integration
+✓ Comprehensive admin panel
+✓ Enhanced visual design with night cityscape
+✓ Sound management system
+✓ Leaderboards and statistics
+✓ Responsive design with animations
+
+This package contains the complete, production-ready Solana casino platform.
