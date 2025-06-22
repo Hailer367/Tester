@@ -19,10 +19,12 @@ export function GameLobby({ onGameSelect }: GameLobbyProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch online players count
-  const { data: onlineCount = 0 } = useQuery<number>({
+  const { data: onlineCountData } = useQuery<{ count: number }>({
     queryKey: ["/api/users/online/count"],
     refetchInterval: 30000
   });
+  
+  const onlineCount = onlineCountData?.count || 0;
 
   // Mock active games data - in real app this would come from API
   const activeGames = [
@@ -138,7 +140,7 @@ export function GameLobby({ onGameSelect }: GameLobbyProps) {
         <div className="glass-morphism rounded-lg px-6 py-3 inline-block">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-white font-semibold">{onlineCount}</span>
+            <span className="text-white font-semibold">{onlineCount || 0}</span>
             <span className="text-gray-400">players online</span>
           </div>
         </div>

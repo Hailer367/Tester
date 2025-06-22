@@ -81,6 +81,8 @@ Recent Changes:
 - June 22, 2025: Implemented sound management system with multiple ambient packs
 - June 22, 2025: Enhanced UI with animated particles and Call of the Night aesthetic
 - June 22, 2025: Expanded admin panel with comprehensive user and game management
+- June 22, 2025: Added enhanced visual styling with night cityscape background and improved navigation
+- June 22, 2025: Configured GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb as primary admin and fee collection wallet
 ```
 
 ## User Preferences

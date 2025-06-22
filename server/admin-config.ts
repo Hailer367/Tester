@@ -1,9 +1,6 @@
 // Authorized admin wallet addresses - Replace with actual admin wallet addresses
 export const AUTHORIZED_ADMIN_WALLETS = [
-  // Add your authorized admin wallet addresses here
-  // These are example addresses for testing - replace with real wallet addresses
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // Example admin wallet 1
-  "11111111111111111111111111111112", // Example admin wallet 2 (system program for testing)
+  "GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb", // Main admin wallet
 ];
 
 // Check if wallet address is authorized admin
@@ -30,5 +27,6 @@ export const DEFAULT_ADMIN_SETTINGS = {
   enableDevnet: "false",
   bannerMessage: "",
   maxBetAmount: "100",
-  minBetAmount: "0.01"
+  minBetAmount: "0.01",
+  feeCollectionWallet: "GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb"
 };
