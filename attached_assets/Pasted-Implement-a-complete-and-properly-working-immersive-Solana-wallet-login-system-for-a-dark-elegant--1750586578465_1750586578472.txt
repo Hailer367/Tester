@@ -1,0 +1,124 @@
+Implement a complete and properly working, immersive Solana wallet login system for a dark, elegant, anime-themed casino website inspired by the aesthetic of the anime Call of the Night.
+
+The site should reflect a night-city atmosphere with deep dark blues, soft whites, gold accents, anime-style shadows, and subtle neon glows to create a dreamy, slightly mysterious, and premium casino experience. Focus on performance, aesthetic coherence, and a delightful user experience
+
+Focus on a polished desktop web interface, optimized for smooth interaction, quick wallet access, and a seamless UI experience.
+With everything organized and categorized in a dashboard for a better experience and visual, with a leaderboard that doesn't pale when it comes to speed and accuracy that shows highest staked, highest win, highest streak and total staked, sound effects that go with the nighty feel that are not too much and not too little, with a chat system that users can chat and interact with other users and also that marks and shows off users that are currently in a winning streak
+
+
+
+---
+
+Core Functionality:
+
+Integrate Solana wallet connection using the Solana Wallet Adapter standard
+
+Support major wallets: Phantom, Backpack, and Solflare
+
+Show a clearly visible “Connect Wallet” button in the top-right of the site
+
+Use a popup modal (or custom-themed alternative) to let users choose a wallet
+
+After connection, display a shortened wallet address (e.g., 4kfa...X1Jz) in the header
+
+Track wallet connection and disconnection states reliably
+
+Detect what wallet extensions users have and show them which wallets they can connect to by saying that a specific wallet is detected
+
+---
+
+UI & UX Styling:
+
+Style the entire wallet login flow to match the Call of the Night visual theme:
+
+Dark navy and purple hues with glowing outlines
+
+Subtle fog or mist effects, light grain or bokeh overlays
+
+Use gold-accented buttons and UI borders
+
+Fonts and interface should have a slightly anime-modern feel, clean and readable
+
+
+The “Connect Wallet” button should glow slightly on hover or pulse when idle (like city neon)
+
+Wallet selection modal should have soft translucent glass styling, slight gold glow borders, and fade-in animation
+
+
+
+---
+
+Post-Login Features:
+
+After a user connects their wallet:
+
+Show a compact user card in the top-right corner with:
+
+Their wallet address (shortened)
+
+Their SOL balance (fetched live from Solana RPC)
+
+Their chosen username ( mandatory before users can complete their registration)
+
+A temporary pfp that users can change anytime they want that is the first letter of their username
+
+
+When hovering or clicking the user card:
+
+Reveal a dropdown with a “Disconnect Wallet” option
+
+Include a clean UI with a neon-style border and fade transitions
+
+
+
+Display a welcome popup with smooth animation:
+
+Example message: “Welcome back, NightDrifter ”
+
+The welcome snackbar or popup should fit the site’s theme: dark background, soft glow, elegant typeface
+
+
+
+
+---
+
+Behavior & Persistence:
+
+Wallet session should persist between page reloads or revisits (autoConnect: true)
+
+Allow users to manually disconnect their wallet at any time
+
+
+
+
+
+---
+
+Backend Sync (if backend is active):
+
+On successful wallet connection:
+
+Send the wallet address and login timestamp to the backend (or Firebase or serverless DB)
+
+Use this to track active users and prepare for leaderboard and gameplay stats
+
+
+
+
+---
+
+Security Notes:
+
+Never store or expose private keys — all signing should occur in-wallet
+
+Sanitize wallet inputs and show friendly error messages in case of failed connections
+
+
+
+---
+
+
+
+Add a wallet denylist feature for blocking known malicious addresses or bots (if available)
+
+Show a small “Info” button near wallet status with a tooltip explaining how the wallet system works for new users
