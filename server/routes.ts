@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { insertUserSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertUserSchema, insertChatMessageSchema, insertAdminSettingSchema, insertFeeWalletSchema, insertAuditLogSchema } from "@shared/schema";
+import { isAuthorizedAdmin } from "./admin-config";
 import { z } from "zod";
 
 interface WebSocketWithUser extends WebSocket {
@@ -187,6 +188,368 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const count = await getOnlineCount();
       res.json({ count });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Admin middleware
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    const walletAddress = req.headers['x-wallet-address'];
+    
+    if (!walletAddress || !isAuthorizedAdmin(walletAddress)) {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    req.adminWallet = walletAddress;
+    next();
+  };
+
+  // Admin Routes
+  
+  // Verify admin status
+  app.get('/api/admin/verify/:address', async (req, res) => {
+    try {
+      const isAuthorized = isAuthorizedAdmin(req.params.address);
+      res.json({ isAuthorized });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get all users (admin only)
+  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const users = Array.from((storage as any).users.values());
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Ban/unban user
+  app.patch('/api/admin/users/:id/ban', requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { banned } = req.body;
+      
+      const user = await storage.banUser(userId, banned);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: banned ? 'ban_user' : 'unban_user',
+        targetUser: user.username,
+        details: `User ${banned ? 'banned' : 'unbanned'} by admin`
+      });
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Mute/unmute user
+  app.patch('/api/admin/users/:id/mute', requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { muted } = req.body;
+      
+      const user = await storage.muteUser(userId, muted);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: muted ? 'mute_user' : 'unmute_user',
+        targetUser: user.username,
+        details: `User ${muted ? 'muted' : 'unmuted'} by admin`
+      });
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Adjust user balance
+  app.patch('/api/admin/users/:id/balance', requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { amount } = req.body;
+      
+      const user = await storage.adjustUserBalance(userId, amount);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'adjust_balance',
+        targetUser: user.username,
+        details: `Balance adjusted by ${amount} SOL`
+      });
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Set user vouch percentage
+  app.patch('/api/admin/users/:id/vouch', requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { percentage } = req.body;
+      
+      const user = await storage.setUserVouchPercentage(userId, percentage);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'set_vouch',
+        targetUser: user.username,
+        details: `Vouch percentage set to ${percentage}%`
+      });
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get admin settings
+  app.get('/api/admin/settings', requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAdminSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Update admin settings
+  app.patch('/api/admin/settings', requireAdmin, async (req, res) => {
+    try {
+      const settingsData = req.body;
+      const updatedSettings = [];
+
+      for (const [key, value] of Object.entries(settingsData)) {
+        if (typeof value === 'string') {
+          const setting = await storage.setAdminSetting({ settingKey: key, settingValue: value });
+          updatedSettings.push(setting);
+        }
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'update_settings',
+        details: `Updated ${updatedSettings.length} settings`
+      });
+
+      res.json(updatedSettings);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get game settings
+  app.get('/api/admin/game-settings', requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getGameSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Update game setting
+  app.patch('/api/admin/game-settings/:gameType', requireAdmin, async (req, res) => {
+    try {
+      const { gameType } = req.params;
+      const updates = req.body;
+      
+      const setting = await storage.updateGameSetting(gameType, updates);
+      if (!setting) {
+        return res.status(404).json({ message: 'Game setting not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'update_game_setting',
+        details: `Updated ${gameType} game settings`
+      });
+
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get fee wallets
+  app.get('/api/admin/fee-wallets', requireAdmin, async (req, res) => {
+    try {
+      const wallets = await storage.getFeeWallets();
+      res.json(wallets);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Add fee wallet
+  app.post('/api/admin/fee-wallets', requireAdmin, async (req, res) => {
+    try {
+      const walletData = insertFeeWalletSchema.parse(req.body);
+      
+      const wallet = await storage.addFeeWallet(walletData);
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'add_fee_wallet',
+        details: `Added fee wallet: ${walletData.walletName}`
+      });
+
+      res.json(wallet);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid wallet data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Update fee wallet
+  app.patch('/api/admin/fee-wallets/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const wallet = await storage.updateFeeWallet(id, updates);
+      if (!wallet) {
+        return res.status(404).json({ message: 'Fee wallet not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'update_fee_wallet',
+        details: `Updated fee wallet: ${wallet.walletName}`
+      });
+
+      res.json(wallet);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Delete fee wallet
+  app.delete('/api/admin/fee-wallets/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const success = await storage.deleteFeeWallet(id);
+      if (!success) {
+        return res.status(404).json({ message: 'Fee wallet not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'delete_fee_wallet',
+        details: `Deleted fee wallet with ID: ${id}`
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get audit logs
+  app.get('/api/admin/audit-logs', requireAdmin, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const logs = await storage.getAuditLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Manual payout
+  app.post('/api/admin/payouts', requireAdmin, async (req, res) => {
+    try {
+      const { userId, amount, reason } = req.body;
+      
+      const user = await storage.adjustUserBalance(userId, amount);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'manual_payout',
+        targetUser: user.username,
+        details: `Manual payout of ${amount} SOL. Reason: ${reason}`
+      });
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Flag user
+  app.post('/api/admin/users/:id/flag', requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Log admin action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'flag_user',
+        targetUser: user.username,
+        details: 'User flagged for suspicious activity'
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Reset leaderboard
+  app.post('/api/admin/leaderboard/reset', requireAdmin, async (req, res) => {
+    try {
+      const { type } = req.body;
+      
+      // This would typically reset specific leaderboard data
+      // For now, just log the action
+      await storage.createAuditLog({
+        adminWallet: req.adminWallet,
+        action: 'reset_leaderboard',
+        details: `Reset ${type} leaderboard`
+      });
+
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
     }

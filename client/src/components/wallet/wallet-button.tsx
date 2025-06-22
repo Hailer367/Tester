@@ -1,14 +1,28 @@
 import { useState } from "react";
+import React from "react";
 import { useWallet } from "./wallet-provider";
 import { WalletModal } from "./wallet-modal";
 import { UsernameModal } from "./username-modal";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { isAuthorizedAdmin } from "@/lib/admin-utils";
 
 export function WalletButton() {
   const { connected, connecting, user, publicKey, solBalance, disconnect } = useWallet();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  React.useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user?.walletAddress) {
+        const adminStatus = await isAuthorizedAdmin(user.walletAddress);
+        setIsAdmin(adminStatus);
+      }
+    };
+    checkAdminStatus();
+  }, [user]);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
@@ -20,10 +34,17 @@ export function WalletButton() {
         <DropdownMenuTrigger asChild>
           <button className="glass-morphism rounded-lg px-4 py-2 flex items-center space-x-3 hover:bg-white/10 transition-all duration-300 group">
             {/* User Avatar */}
-            <div 
-              className={`w-8 h-8 bg-gradient-to-br ${getUserGradient(user.profileColor)} rounded-full flex items-center justify-center text-[var(--midnight)] font-bold text-sm`}
-            >
-              {user.avatar}
+            <div className="relative">
+              <div 
+                className={`w-8 h-8 bg-gradient-to-br ${getUserGradient(user.profileColor)} rounded-full flex items-center justify-center text-[var(--midnight)] font-bold text-sm ${isAdmin ? 'border-2 border-[var(--gold)]' : ''}`}
+              >
+                {isAdmin ? <i className="fas fa-crown text-xs"></i> : user.avatar}
+              </div>
+              {isAdmin && (
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[var(--gold)] rounded-full flex items-center justify-center">
+                  <i className="fas fa-shield-alt text-[var(--midnight)] text-xs"></i>
+                </div>
+              )}
             </div>
             
             {/* User Info */}
@@ -61,6 +82,13 @@ export function WalletButton() {
             <i className="fas fa-user text-gray-400 mr-2"></i>
             Profile Settings
           </DropdownMenuItem>
+          
+          {isAdmin && (
+            <DropdownMenuItem className="hover:bg-[var(--gold)]/20 focus:bg-[var(--gold)]/20 text-[var(--gold)]">
+              <i className="fas fa-shield-alt mr-2"></i>
+              <a href="/admin" className="w-full">Admin Panel</a>
+            </DropdownMenuItem>
+          )}
           
           <DropdownMenuItem className="hover:bg-white/10 focus:bg-white/10">
             <i className="fas fa-history text-gray-400 mr-2"></i>

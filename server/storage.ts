@@ -1,4 +1,10 @@
-import { users, chatMessages, gameStats, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type GameStats, type InsertGameStats } from "@shared/schema";
+import { 
+  users, chatMessages, gameStats, adminSettings, gameSettings, feeWallets, auditLogs,
+  type User, type InsertUser, type ChatMessage, type InsertChatMessage, 
+  type GameStats, type InsertGameStats, type AdminSetting, type InsertAdminSetting,
+  type GameSetting, type InsertGameSetting, type FeeWallet, type InsertFeeWallet,
+  type AuditLog, type InsertAuditLog
+} from "@shared/schema";
 
 export interface IStorage {
   // User operations
@@ -23,23 +29,65 @@ export interface IStorage {
   // Game stats operations
   createGameStats(stats: InsertGameStats): Promise<GameStats>;
   updateUserStats(userId: number, isWin: boolean, betAmount: string, winAmount: string): Promise<void>;
+  
+  // Admin operations
+  getAdminSettings(): Promise<AdminSetting[]>;
+  getAdminSetting(key: string): Promise<AdminSetting | undefined>;
+  setAdminSetting(setting: InsertAdminSetting): Promise<AdminSetting>;
+  
+  // Game settings
+  getGameSettings(): Promise<GameSetting[]>;
+  getGameSetting(gameType: string): Promise<GameSetting | undefined>;
+  updateGameSetting(gameType: string, updates: Partial<GameSetting>): Promise<GameSetting | undefined>;
+  
+  // Fee wallets
+  getFeeWallets(): Promise<FeeWallet[]>;
+  addFeeWallet(wallet: InsertFeeWallet): Promise<FeeWallet>;
+  updateFeeWallet(id: number, updates: Partial<FeeWallet>): Promise<FeeWallet | undefined>;
+  deleteFeeWallet(id: number): Promise<boolean>;
+  
+  // Audit logs
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(limit?: number): Promise<AuditLog[]>;
+  
+  // Admin user management
+  setUserAdmin(userId: number, isAdmin: boolean): Promise<User | undefined>;
+  banUser(userId: number, banned: boolean): Promise<User | undefined>;
+  muteUser(userId: number, muted: boolean): Promise<User | undefined>;
+  setUserVouchPercentage(userId: number, percentage: string): Promise<User | undefined>;
+  adjustUserBalance(userId: number, amount: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private chatMessages: Map<number, ChatMessage>;
   private gameStats: Map<number, GameStats>;
+  private adminSettings: Map<string, AdminSetting>;
+  private gameSettings: Map<string, GameSetting>;
+  private feeWallets: Map<number, FeeWallet>;
+  private auditLogs: Map<number, AuditLog>;
   private currentUserId: number;
   private currentChatId: number;
   private currentGameStatsId: number;
+  private currentFeeWalletId: number;
+  private currentAuditLogId: number;
 
   constructor() {
     this.users = new Map();
     this.chatMessages = new Map();
     this.gameStats = new Map();
+    this.adminSettings = new Map();
+    this.gameSettings = new Map();
+    this.feeWallets = new Map();
+    this.auditLogs = new Map();
     this.currentUserId = 1;
     this.currentChatId = 1;
     this.currentGameStatsId = 1;
+    this.currentFeeWalletId = 1;
+    this.currentAuditLogId = 1;
+    
+    // Initialize default settings
+    this.initializeDefaultSettings();
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -69,6 +117,10 @@ export class MemStorage implements IStorage {
       maxStreak: 0,
       lastActivity: new Date(),
       isOnline: true,
+      isAdmin: false,
+      isBanned: false,
+      isMuted: false,
+      vouchPercentage: "0",
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -176,6 +228,164 @@ export class MemStorage implements IStorage {
     }
 
     await this.updateUser(userId, updates);
+  }
+
+  private initializeDefaultSettings() {
+    // Initialize default admin settings
+    const defaultSettings = [
+      { settingKey: "maintenanceMode", settingValue: "false" },
+      { settingKey: "maxPlayersOnline", settingValue: "1000" },
+      { settingKey: "defaultHouseEdge", settingValue: "1.5" },
+      { settingKey: "enableDevnet", settingValue: "false" },
+      { settingKey: "bannerMessage", settingValue: "" },
+    ];
+
+    defaultSettings.forEach(setting => {
+      const adminSetting: AdminSetting = {
+        id: this.adminSettings.size + 1,
+        settingKey: setting.settingKey,
+        settingValue: setting.settingValue,
+        updatedAt: new Date(),
+      };
+      this.adminSettings.set(setting.settingKey, adminSetting);
+    });
+
+    // Initialize default game settings
+    const gameTypes = ["dice", "coinflip", "crash", "blackjack"];
+    gameTypes.forEach(gameType => {
+      const gameSetting: GameSetting = {
+        id: this.gameSettings.size + 1,
+        gameType,
+        houseEdge: "1.5",
+        playingFee: "2.0",
+        isEnabled: true,
+        updatedAt: new Date(),
+      };
+      this.gameSettings.set(gameType, gameSetting);
+    });
+  }
+
+  async getAdminSettings(): Promise<AdminSetting[]> {
+    return Array.from(this.adminSettings.values());
+  }
+
+  async getAdminSetting(key: string): Promise<AdminSetting | undefined> {
+    return this.adminSettings.get(key);
+  }
+
+  async setAdminSetting(setting: InsertAdminSetting): Promise<AdminSetting> {
+    const existing = this.adminSettings.get(setting.settingKey);
+    const adminSetting: AdminSetting = {
+      id: existing?.id || this.adminSettings.size + 1,
+      settingKey: setting.settingKey,
+      settingValue: setting.settingValue,
+      updatedAt: new Date(),
+    };
+    this.adminSettings.set(setting.settingKey, adminSetting);
+    return adminSetting;
+  }
+
+  async getGameSettings(): Promise<GameSetting[]> {
+    return Array.from(this.gameSettings.values());
+  }
+
+  async getGameSetting(gameType: string): Promise<GameSetting | undefined> {
+    return this.gameSettings.get(gameType);
+  }
+
+  async updateGameSetting(gameType: string, updates: Partial<GameSetting>): Promise<GameSetting | undefined> {
+    const existing = this.gameSettings.get(gameType);
+    if (!existing) return undefined;
+
+    const updated: GameSetting = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.gameSettings.set(gameType, updated);
+    return updated;
+  }
+
+  async getFeeWallets(): Promise<FeeWallet[]> {
+    return Array.from(this.feeWallets.values());
+  }
+
+  async addFeeWallet(wallet: InsertFeeWallet): Promise<FeeWallet> {
+    const id = this.currentFeeWalletId++;
+    const feeWallet: FeeWallet = {
+      id,
+      walletAddress: wallet.walletAddress,
+      walletName: wallet.walletName,
+      isActive: true,
+      gameTypes: wallet.gameTypes || [],
+      totalCollected: "0",
+      createdAt: new Date(),
+    };
+    this.feeWallets.set(id, feeWallet);
+    return feeWallet;
+  }
+
+  async updateFeeWallet(id: number, updates: Partial<FeeWallet>): Promise<FeeWallet | undefined> {
+    const existing = this.feeWallets.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...updates };
+    this.feeWallets.set(id, updated);
+    return updated;
+  }
+
+  async deleteFeeWallet(id: number): Promise<boolean> {
+    return this.feeWallets.delete(id);
+  }
+
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const id = this.currentAuditLogId++;
+    const auditLog: AuditLog = {
+      id,
+      adminWallet: log.adminWallet,
+      action: log.action,
+      targetUser: log.targetUser || null,
+      details: log.details || null,
+      timestamp: new Date(),
+    };
+    this.auditLogs.set(id, auditLog);
+    return auditLog;
+  }
+
+  async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    return Array.from(this.auditLogs.values())
+      .sort((a, b) => (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0))
+      .slice(0, limit);
+  }
+
+  async setUserAdmin(userId: number, isAdmin: boolean): Promise<User | undefined> {
+    return this.updateUser(userId, { isAdmin });
+  }
+
+  async banUser(userId: number, banned: boolean): Promise<User | undefined> {
+    return this.updateUser(userId, { isBanned: banned });
+  }
+
+  async muteUser(userId: number, muted: boolean): Promise<User | undefined> {
+    return this.updateUser(userId, { isMuted: muted });
+  }
+
+  async setUserVouchPercentage(userId: number, percentage: string): Promise<User | undefined> {
+    return this.updateUser(userId, { vouchPercentage: percentage });
+  }
+
+  async adjustUserBalance(userId: number, amount: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+
+    const currentBalance = parseFloat(user.solBalance || "0");
+    const adjustment = parseFloat(amount);
+    const newBalance = Math.max(0, currentBalance + adjustment);
+
+    return this.updateUser(userId, { 
+      solBalance: newBalance.toString(),
+      lastActivity: new Date()
+    });
   }
 }
 

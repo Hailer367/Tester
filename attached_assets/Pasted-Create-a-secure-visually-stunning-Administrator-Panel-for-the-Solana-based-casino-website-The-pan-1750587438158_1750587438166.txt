@@ -1,0 +1,167 @@
+Create a secure, visually stunning Administrator Panel for the Solana-based casino website.
+The panel must match the site’s aesthetic — inspired by the anime Call of the Night, with deep blues, gold highlights, soft neon effects, and crisp, professional UI with anime-modern flair.
+
+The admin panel should be accessible only to authorized wallet addresses, not public users.
+And only shown to specific and authorized wallets and shown in the category as "Admin Panel" but only visible to authorized users, admins have a distinct pfp and pfp border than other users and also colourful pfp border,playing fees only apply to winning users and users that have lost the game will not pay any except for the transaction fee that their wallets ask for, and playing fees will only be calculated after a user has won and collected their winnings, so if a user bet 2 SOL and manged to win another 2 SOL then the playing fees are calculated from their 4 SOL and once the playing fees are paid the remaining winnings of the user will be sent to their connected wallet, playing fees are different for each game and admins can change them at will and will be calculated in either % or as a number like 0.0001 SOL
+
+
+
+---
+
+️ Core Admin Panel Features:
+
+Admin-only access via Solana wallet connection (e.g., allow only pre-approved wallet addresses)
+
+Dashboard layout with a left-side vertical nav menu (dark with gold highlights)
+
+Top navigation bar with:
+
+Admin wallet address
+
+Logout/Disconnect
+
+Optional alert/notification icon
+
+a controll panel for everything
+
+Enable devnet/testnet switching if testing before production
+
+
+
+
+
+
+---
+
+Pages/Sections to Include:
+
+1. User Management
+
+View all connected player wallets
+
+See basic info per wallet:
+
+Wallet address
+
+Total SOL staked
+
+Total wins/losses
+
+Date joined
+
+Last active
+
+Option to ban, mute, or flag wallets
+
+view total number of users signed in and total active currently
+
+
+2. Game Stats
+
+Real-time and historical metrics:
+
+Most played games
+
+Total SOL volume (24h, 7d, all-time)
+
+Active users online
+
+Win/loss ratio charts
+
+controll the playing fee that a game takes from winning users
+
+
+Stylish charts using glowing or animated graphs with anime-style shadows
+
+
+3. Leaderboard Control
+
+View/edit leaderboard entries
+
+Reset leaderboard (confirm dialog required)
+
+Flag suspicious winners
+
+
+4. Reports & Cheating Logs
+
+Show flagged actions or suspected bot activity
+
+Log:
+
+Abnormal win rates
+
+Multi-wallet behavior
+
+Scripted interactions
+
+
+Option to download logs as CSV or JSON
+
+
+5. Manual Adjustments
+
+Add or subtract SOL from player accounts (if supported via backend)
+
+Trigger manual payouts or test wins
+
+Disable a specific game temporarily
+
+
+6. Casino Settings
+
+Set house edge %
+
+Enable/disable specific games
+
+control the amount of playing fees are incurred from winning each game
+
+Update banner messages, notifications, or event timers
+
+Maintenance mode toggle
+
+7. Withdrawal Wallets
+
+A place where fees are collected from every game and stored in wallets that are connected in this section
+
+A maximum of 3 wallets can be connected in this section, and admins can chose which wallet takes fees from which game by a simple on and off button
+
+only admins have the right to view and control every part of this section
+
+8.Vouch
+
+A system in which admins can vouch for a user and increase that user's chance of winning by % of their choice in the shadows but is not visible to the user and others
+
+
+---
+
+Visual Theme & UI Details:
+
+Use a glass-like dark dashboard layout with glows around widgets and stat cards
+
+Components should include:
+
+Smooth sliding side menu
+
+Tabbed sections with gold underlines
+
+Subtle anime-inspired hover effects and animation
+
+Stylish data cards and alerts with a night-sky/urban glow vibe
+
+
+Add a small animated anime-style admin avatar or admin mascot in the corner of the dashboard
+
+
+
+---
+
+Security Requirements:
+
+Only pre-specified wallet addresses (loaded from config or backend) can access this panel
+
+once an authorized wallet connects to the website, they will be welcomed by a special dialogue that is only for authorized users and will have access to the admin panel
+
+Use Solana wallet signature for login verification (not just connection)
+
+All changes should trigger backend logging and confirmation dialogs
