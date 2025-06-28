@@ -1,12 +1,14 @@
 import { 
   users, chatMessages, gameStats, adminSettings, gameSettings, feeWallets, auditLogs,
-  shopItems, userInventory, purchaseLogs, collectorBots, gameStatuses,
+  shopItems, userInventory, purchaseLogs, collectorBots, gameStatuses, games, gameTransactions, sideBets,
   type User, type InsertUser, type ChatMessage, type InsertChatMessage, 
   type GameStats, type InsertGameStats, type AdminSetting, type InsertAdminSetting,
   type GameSetting, type InsertGameSetting, type FeeWallet, type InsertFeeWallet,
   type AuditLog, type InsertAuditLog, type ShopItem, type InsertShopItem,
   type UserInventory, type InsertUserInventory, type PurchaseLog, type InsertPurchaseLog,
-  type CollectorBot, type InsertCollectorBot, type GameStatus, type InsertGameStatus
+  type CollectorBot, type InsertCollectorBot, type GameStatus, type InsertGameStatus,
+  type Game, type InsertGame, type GameTransaction, type InsertGameTransaction,
+  type SideBet, type InsertSideBet
 } from "@shared/schema";
 
 export interface IStorage {
@@ -87,6 +89,23 @@ export interface IStorage {
   getGameStatuses(): Promise<GameStatus[]>;
   getGameStatus(gameType: string): Promise<GameStatus | undefined>;
   updateGameStatus(gameType: string, updates: Partial<GameStatus>): Promise<GameStatus | undefined>;
+  
+  // Game operations
+  getGames(): Promise<Game[]>;
+  getGame(id: number): Promise<Game | undefined>;
+  createGame(game: InsertGame): Promise<Game>;
+  updateGame(id: number, updates: Partial<Game>): Promise<Game | undefined>;
+  deleteGame(id: number): Promise<boolean>;
+  
+  // Game transaction operations
+  getGameTransactions(gameId: number): Promise<GameTransaction[]>;
+  createGameTransaction(transaction: InsertGameTransaction): Promise<GameTransaction>;
+  updateGameTransaction(id: number, updates: Partial<GameTransaction>): Promise<GameTransaction | undefined>;
+  
+  // Side bet operations
+  getSideBets(gameId: number): Promise<SideBet[]>;
+  createSideBet(sideBet: InsertSideBet): Promise<SideBet>;
+  updateSideBet(id: number, updates: Partial<SideBet>): Promise<SideBet | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -102,6 +121,9 @@ export class MemStorage implements IStorage {
   private purchaseLogs: Map<number, PurchaseLog>;
   private collectorBots: Map<number, CollectorBot>;
   private gameStatuses: Map<string, GameStatus>;
+  private games: Map<number, Game>;
+  private gameTransactions: Map<number, GameTransaction>;
+  private sideBets: Map<number, SideBet>;
   private currentUserId: number;
   private currentChatId: number;
   private currentGameStatsId: number;
@@ -111,6 +133,9 @@ export class MemStorage implements IStorage {
   private currentInventoryId: number;
   private currentPurchaseLogId: number;
   private currentCollectorBotId: number;
+  private currentGameId: number;
+  private currentGameTransactionId: number;
+  private currentSideBetId: number;
 
   constructor() {
     this.users = new Map();
@@ -125,6 +150,9 @@ export class MemStorage implements IStorage {
     this.purchaseLogs = new Map();
     this.collectorBots = new Map();
     this.gameStatuses = new Map();
+    this.games = new Map();
+    this.gameTransactions = new Map();
+    this.sideBets = new Map();
     this.currentUserId = 1;
     this.currentChatId = 1;
     this.currentGameStatsId = 1;
@@ -134,6 +162,9 @@ export class MemStorage implements IStorage {
     this.currentInventoryId = 1;
     this.currentPurchaseLogId = 1;
     this.currentCollectorBotId = 1;
+    this.currentGameId = 1;
+    this.currentGameTransactionId = 1;
+    this.currentSideBetId = 1;
     
     // Initialize default settings
     this.initializeDefaultSettings();
@@ -609,6 +640,115 @@ export class MemStorage implements IStorage {
 
     const updated: GameStatus = { ...status, ...updates };
     this.gameStatuses.set(gameType, updated);
+    return updated;
+  }
+
+  // Game operations
+  async getGames(): Promise<Game[]> {
+    return Array.from(this.games.values());
+  }
+
+  async getGame(id: number): Promise<Game | undefined> {
+    return this.games.get(id);
+  }
+
+  async createGame(game: InsertGame): Promise<Game> {
+    const id = this.currentGameId++;
+    const newGame: Game = {
+      id,
+      gameType: game.gameType,
+      gameMode: game.gameMode || "1v1",
+      minPlayers: game.minPlayers || 2,
+      maxPlayers: game.maxPlayers || 2,
+      betAmount: game.betAmount,
+      totalPool: "0",
+      playingFee: game.playingFee || "0.0001",
+      status: "waiting",
+      winner: null,
+      createdBy: game.createdBy,
+      createdAt: new Date(),
+      startedAt: null,
+      completedAt: null,
+      gameData: game.gameData || null,
+      canCancelAfter: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+      isPrivate: game.isPrivate || false,
+      roomCode: game.roomCode || null,
+    };
+    this.games.set(id, newGame);
+    return newGame;
+  }
+
+  async updateGame(id: number, updates: Partial<Game>): Promise<Game | undefined> {
+    const game = this.games.get(id);
+    if (!game) return undefined;
+
+    const updated: Game = { ...game, ...updates };
+    this.games.set(id, updated);
+    return updated;
+  }
+
+  async deleteGame(id: number): Promise<boolean> {
+    return this.games.delete(id);
+  }
+
+  // Game transaction operations
+  async getGameTransactions(gameId: number): Promise<GameTransaction[]> {
+    return Array.from(this.gameTransactions.values()).filter(tx => tx.gameId === gameId);
+  }
+
+  async createGameTransaction(transaction: InsertGameTransaction): Promise<GameTransaction> {
+    const id = this.currentGameTransactionId++;
+    const gameTransaction: GameTransaction = {
+      id,
+      gameId: transaction.gameId,
+      toAddress: transaction.toAddress,
+      amount: transaction.amount,
+      type: transaction.type,
+      txHash: transaction.txHash || null,
+      status: "pending",
+      createdAt: new Date(),
+      completedAt: null,
+    };
+    this.gameTransactions.set(id, gameTransaction);
+    return gameTransaction;
+  }
+
+  async updateGameTransaction(id: number, updates: Partial<GameTransaction>): Promise<GameTransaction | undefined> {
+    const transaction = this.gameTransactions.get(id);
+    if (!transaction) return undefined;
+
+    const updated: GameTransaction = { ...transaction, ...updates };
+    this.gameTransactions.set(id, updated);
+    return updated;
+  }
+
+  // Side bet operations
+  async getSideBets(gameId: number): Promise<SideBet[]> {
+    return Array.from(this.sideBets.values()).filter(bet => bet.gameId === gameId);
+  }
+
+  async createSideBet(sideBet: InsertSideBet): Promise<SideBet> {
+    const id = this.currentSideBetId++;
+    const newSideBet: SideBet = {
+      id,
+      gameId: sideBet.gameId,
+      bettor: sideBet.bettor,
+      betOnWinner: sideBet.betOnWinner,
+      betAmount: sideBet.betAmount,
+      payout: null,
+      isWon: null,
+      createdAt: new Date(),
+    };
+    this.sideBets.set(id, newSideBet);
+    return newSideBet;
+  }
+
+  async updateSideBet(id: number, updates: Partial<SideBet>): Promise<SideBet | undefined> {
+    const sideBet = this.sideBets.get(id);
+    if (!sideBet) return undefined;
+
+    const updated: SideBet = { ...sideBet, ...updates };
+    this.sideBets.set(id, updated);
     return updated;
   }
 }

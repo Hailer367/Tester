@@ -1,0 +1,391 @@
+Continue building the Solana-based anime casino website Nightfall Casino. Integrate the following luck-based PVP games, all driven by player stakes, no admin-funded prizes, and deeply themed around a dreamy, night-city atmosphere inspired by Call of the Night.
+After a user has opened a game by themselves after betting their chosen amount of SOL (min 0.001 SOL) for other people to join, they can not cancel the game at will, but they can cancel the game and receive their SOL (with transaction fee, no playing fee) after a 5 minute Timeframe that is displayed clearly for them, after the 5 minute is up the user can cancel the game and get his SOL back (with transaction fee)
+
+---
+
+Games to Implement
+
+
+---
+
+1.  Moon Flip
+
+A Solana-themed coin flip:
+
+Moon = heads
+
+Star = tails
+
+
+Coin has a glowing outline, floats and flips slowly, with spark trails
+
+Winner gets both players' stakes minus a fee
+
+
+
+---
+
+2.  Dice Duel
+
+1v1 dice roll (1–100), higher roll wins the pot
+
+Dice glow and roll with soft bounce easing
+
+No sound spikes, just subtle dice-rolling ambiance
+
+
+
+---
+
+3.  Snake and Ladder (PVP Duel)
+
+Both players roll dice per turn
+
+Board and ladder/snake placements are:
+
+Random for every game
+
+Balanced to prevent unfair scenarios
+
+
+Board is vertical with glowing tiles, misty neon snakes, and golden ladders
+
+Movement has soft, snappy transitions with particle effects
+
+
+
+---
+
+4.  Wheel of Fate
+
+Players pick from unique segments before spin
+
+The wheel:
+
+Has mystical symbols (moons, stars, runes)
+
+Spins with a soft whir, light glows, and mist trails
+
+No high-energy audio buildup — all calm, atmospheric
+
+
+Winner is based on fair RNG
+
+
+
+---
+
+5.  Mine Flip
+
+Player A hides a bomb behind one of 3 panels
+
+Player B picks one
+
+If B avoids the bomb, B wins
+
+And if player B touches the bomb, player A wins
+
+Panel flip is slow, glowing, and cinematic
+
+Nightglass-style UI — soft, mysterious FX
+
+
+
+---
+
+6.  Mystery Box Duel
+
+Two glowing boxes — only one contains the SOL pot
+
+Both players pick; system reveals the winner box
+
+Make it fair and make sense
+
+Suspense is visual (particle glow, mist), not audio-driven
+
+
+
+---
+
+7.  Roulette Lite
+
+1–12 tile wheel with glowing numerals
+
+Players pick a tile
+
+Wheel spins softly with glowing tail and smooth deceleration
+
+No dramatic sound — just light ambient SFX to match the vibe
+
+
+
+---
+
+Game Rules & Logic (For All Games)
+
+Games are completely luck-based
+
+Stake loop logic:
+
+Players stake SOL
+
+Winner receives total pot minus a flat 0.0001 SOL fee
+
+
+No platform wallet pays out winnings
+
+Admin can:
+
+Adjust minimum bet (default: 0.001 SOL)
+
+Adjust fee amount
+
+Set/change fee destination wallet
+
+
+
+
+---
+
+Visual, UX & Sound Design
+
+Apply consistently across all games:
+
+Visuals: dark purples, navy, gold accents, glowing outlines
+
+Animation: smooth, floating, neon-inspired transitions
+
+Sound:
+
+No loud builds or arcade FX
+
+Use ambient night sounds, soft win tones, gentle hover FX
+
+
+Chat & UI: toast notifications, streak effects, glowing badges
+
+Fully responsive, optimized for Vercel deployment
+
+Use Tailwind CSS + React, modular component structure
+
+
+
+---
+
+> Add these seven unique luck-based games to Nightfall Casino, themed deeply around nighttime, subtle animation, immersive visuals, and soft atmosphere. Make the experience addictive but calm — like gambling beneath the stars.
+
+Update the following games to allow both 1v1 duels and optional group mode, depending on how players choose to set up or join games.
+
+
+---
+
+Roulette Lite
+
+>  A glowing, simplified roulette game themed for Nightfall’s anime-night aesthetic.
+
+
+
+Player count: 2–6
+
+Duel Mode (1v1):
+
+Each player picks two numbers (e.g., 2 & 7)
+
+If a chosen number hits, that player wins
+
+
+Group Mode (3–6 players):
+
+All players pick 2 unique numbers
+
+The wheel spins and lands on 1 of 12 glowing segments
+
+The winner receives the entire pot (minus 0.0001 SOL fee)
+
+If no player wins, reroll with a glowing suspense animation
+
+
+
+> ✨ Add a button to "Play with 2 Players" or "Start Group Game" when creating a room
+Add a 15-second countdown when lobby is full or 6 players have joined
+
+
+
+
+---
+
+Mystery Box Duel
+
+>  Suspense game where players pick one box — only one contains the winnings.
+
+
+
+Player count: 3–5
+
+Each player selects one mystery box (UI: floating glowing boxes, randomized location)
+
+One box holds the entire prize pot
+
+All others are empty
+
+The winning player receives the full pool minus fee
+
+If no one picks the right box (optional edge case), they can continue the game with new boxes
+
+Boxes flip open one at a time with slow glow and reveal effect
+
+
+>  Animate all the box flips slowly for added tension
+Boxes shimmer and pulse as hover effects
+
+
+
+
+---
+
+♻️ Unified Multiplayer System (Applies to All Games)
+
+Show player count allowed for each game:
+
+e.g. Dice Duel (2 Players), Roulette Lite (2–6), Mystery Box (3–5)
+
+
+For every game:
+
+Allow users to either Create Private Game or Join Public Game
+
+Display real-time "players in room" counter
+
+Start game automatically when minimum players reached + countdown expires
+
+
+
+
+---
+
+⚙️ Payout Structure for Multiplayer
+
+All players stake the same fixed amount (minimum: 0.001 SOL)
+
+One winner receives:
+
+Total pool – 0.0001 SOL playing fee based on how many players joined
+
+Example: if 5 people were to play a game and one of them wins, the playing fee will be 0.0005 SOL
+
+
+Playing fee goes to admin wallet (adjustable via Admin Panel)
+
+In 1v1, winner gets the other player’s stake (same logic)
+
+Gameplay
+
+Streak-Based Betting Buffs
+Visual-only effects (glows, badges) during gameplay and leaderboard when a user is on a win streak.
+
+Side Wagers for Snake & Ladder
+Spectators can bet small SOL amounts on who they think will win — payouts go to correct betters from losing bet pool.
+
+Spectate Mode (Optimized)
+Allow users to watch ongoing Snake & Ladder games with synced moves, chat, and effects (no performance drop).
+
+
+
+---
+
+UI & Cosmetic
+
+Live Leaderboard Animations
+Top 3 glow and animate in real-time as stats update (position shuffle, particle glow, streak flare).
+
+Custom HUD Themes
+Unlockable visual skins for game UI (e.g., Sakura, Glitch Neon, Gold Noir) via the shop.
+
+Unique Favicon/Icon
+Custom moon/star/night-themed site icon visible in tabs and bookmarks.
+
+
+
+---
+
+Security & Admin
+
+Fairness Provably System
+Display verifiable randomness using Solana hash signatures or third-party randomness oracle (e.g., switchboard.xyz).
+
+Revenue Dashboard
+Admin panel section showing:
+
+SOL earned by category (games, shop, fees)
+
+Daily/weekly summaries
+
+Top spenders
+
+Export to CSV
+
+
+
+
+---
+
+UX & UI Rules (Group Mode Only)
+
+Use a night lounge lobby UI where avatars or wallet initials float around until game starts
+
+Leaderboard icons or badges glow based on past wins
+
+Animate the winning result (roulette roll, box reveal) only after all choices are locked in
+
+Sound must remain soft and ambient — no hype or arcade sounds
+
+
+Add the following enhanced features to the existing Nightfall Casino codebase:
+
+
+---
+
+Playing Fee System:
+
+Set the default playing fee to 0.0001 SOL.
+
+Automatically estimate and deduct Solana transaction (network) fees from the winner's payout before the fee is sent.
+
+Do not charge losing players.
+
+All fees must be transferred to the admin-designated wallet:
+
+> GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb
+
+
+
+Backend must log all:
+
+Amounts deducted
+
+Source game
+
+Time/date
+
+Wallet involved
+
+
+
+
+---
+
+Admin Fee + Control Wallet:
+
+Treat GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb as:
+
+The sole admin wallet for dashboard access
+
+The fee collector wallet for all game fees and shop SOL purchases
+
+
+
+
+---
+
+> Add dual support for 1v1 and group-based games in Nightfall Casino.
+All game logic must support a looped payout: winners are always paid from losing player stakes. No admin funds are ever used.

@@ -193,6 +193,272 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auth middleware
+  const validateAuth = async (req: any, res: any, next: any) => {
+    const walletAddress = req.headers['x-wallet-address'];
+    
+    if (!walletAddress) {
+      return res.status(401).json({ message: 'Wallet address required' });
+    }
+    
+    // Verify the user exists
+    const user = await storage.getUserByWalletAddress(walletAddress);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    
+    (req as any).walletAddress = walletAddress;
+    (req as any).user = user;
+    next();
+  };
+
+  // Game Routes
+  
+  // Get all games
+  app.get('/api/games', async (req, res) => {
+    try {
+      const games = await storage.getGames();
+      res.json(games);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get specific game
+  app.get('/api/games/:id', async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const game = await storage.getGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: 'Game not found' });
+      }
+      
+      res.json(game);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Create new game
+  app.post('/api/games', validateAuth, async (req, res) => {
+    try {
+      const { gameType, gameMode, betAmount, isPrivate } = req.body;
+      const createdBy = (req as any).walletAddress;
+
+      if (!gameType || !betAmount) {
+        return res.status(400).json({ message: 'Game type and bet amount required' });
+      }
+
+      const minBet = 0.001;
+      if (parseFloat(betAmount) < minBet) {
+        return res.status(400).json({ message: `Minimum bet is ${minBet} SOL` });
+      }
+
+      const game = await storage.createGame({
+        gameType,
+        gameMode: gameMode || "1v1",
+        betAmount: betAmount.toString(),
+        createdBy,
+        isPrivate: isPrivate || false,
+        gameData: JSON.stringify({ participants: [createdBy] }),
+      });
+
+      // Broadcast new game creation
+      broadcast({
+        type: 'game_created',
+        game
+      });
+
+      res.json(game);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Join existing game
+  app.post('/api/games/:id/join', validateAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const walletAddress = (req as any).walletAddress;
+      
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: 'Game not found' });
+      }
+
+      if (game.status !== 'waiting') {
+        return res.status(400).json({ message: 'Game is not accepting players' });
+      }
+
+      const gameData = game.gameData ? JSON.parse(game.gameData) : {};
+      const participants = gameData.participants || [];
+
+      if (participants.includes(walletAddress)) {
+        return res.status(400).json({ message: 'Already joined this game' });
+      }
+
+      if (participants.length >= game.maxPlayers) {
+        return res.status(400).json({ message: 'Game is full' });
+      }
+
+      participants.push(walletAddress);
+      gameData.participants = participants;
+
+      const totalPool = (parseFloat(game.betAmount) * participants.length).toString();
+
+      const updatedGame = await storage.updateGame(gameId, {
+        gameData: JSON.stringify(gameData),
+        totalPool,
+        status: participants.length >= game.minPlayers ? 'in_progress' : 'waiting',
+        startedAt: participants.length >= game.minPlayers ? new Date() : null,
+      });
+
+      // Broadcast game update
+      broadcast({
+        type: 'game_updated',
+        game: updatedGame
+      });
+
+      res.json(updatedGame);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Complete game with winner
+  app.post('/api/games/:id/complete', validateAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const { winner, gameResult } = req.body;
+      const walletAddress = (req as any).walletAddress;
+      
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: 'Game not found' });
+      }
+
+      if (game.status !== 'in_progress') {
+        return res.status(400).json({ message: 'Game is not in progress' });
+      }
+
+      // Verify the requester is a participant
+      const gameData = game.gameData ? JSON.parse(game.gameData) : {};
+      const participants = gameData.participants || [];
+      
+      if (!participants.includes(walletAddress)) {
+        return res.status(403).json({ message: 'Not a participant in this game' });
+      }
+
+      // Update game as completed
+      const updatedGame = await storage.updateGame(gameId, {
+        status: 'completed',
+        winner,
+        completedAt: new Date(),
+        gameData: JSON.stringify({ ...gameData, result: gameResult }),
+      });
+
+      // Update user statistics
+      for (const participant of participants) {
+        const isWinner = participant === winner;
+        const betAmount = game.betAmount;
+        const winAmount = isWinner ? game.totalPool : "0";
+        
+        const user = await storage.getUserByWalletAddress(participant);
+        if (user) {
+          await storage.updateUserStats(user.id, isWinner, betAmount, winAmount);
+        }
+      }
+
+      // Process payout automatically
+      if (winner) {
+        const { payoutSystem } = await import('./payout-system');
+        const payoutResult = await payoutSystem.processGamePayout(gameId, winner);
+        
+        if (!payoutResult.success) {
+          console.error('Payout failed:', payoutResult.error);
+        }
+      }
+
+      // Broadcast game completion
+      broadcast({
+        type: 'game_completed',
+        game: updatedGame
+      });
+
+      res.json(updatedGame);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Cancel game (only by creator and after 5 minutes)
+  app.post('/api/games/:id/cancel', validateAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const walletAddress = (req as any).walletAddress;
+      
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: 'Game not found' });
+      }
+
+      if (game.createdBy !== walletAddress) {
+        return res.status(403).json({ message: 'Only game creator can cancel' });
+      }
+
+      if (game.status !== 'waiting') {
+        return res.status(400).json({ message: 'Cannot cancel game in progress' });
+      }
+
+      // Check if 5 minutes have passed
+      const now = new Date();
+      const canCancelAfter = game.canCancelAfter || new Date(0);
+      
+      if (now < canCancelAfter) {
+        const timeLeft = Math.ceil((canCancelAfter.getTime() - now.getTime()) / 1000);
+        return res.status(400).json({ 
+          message: `Can cancel in ${timeLeft} seconds`,
+          timeLeft 
+        });
+      }
+
+      const updatedGame = await storage.updateGame(gameId, {
+        status: 'cancelled',
+        completedAt: new Date(),
+      });
+
+      // Process refunds
+      const { payoutSystem } = await import('./payout-system');
+      const refundResult = await payoutSystem.processGameRefund(gameId);
+      
+      if (!refundResult.success) {
+        console.error('Refund failed:', refundResult.error);
+      }
+
+      // Broadcast game cancellation
+      broadcast({
+        type: 'game_cancelled',
+        game: updatedGame
+      });
+
+      res.json(updatedGame);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get game transactions
+  app.get('/api/games/:id/transactions', async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const transactions = await storage.getGameTransactions(gameId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
   // Admin middleware
   const requireAdmin = async (req: any, res: any, next: any) => {
     const walletAddress = req.headers['x-wallet-address'];

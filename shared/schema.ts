@@ -164,6 +164,51 @@ export const gameStatuses = pgTable("game_statuses", {
   lockedAt: timestamp("locked_at"),
 });
 
+// Comprehensive game system tables
+export const games = pgTable("games", {
+  id: serial("id").primaryKey(),
+  gameType: text("game_type").notNull(), // "moon_flip", "dice_duel", "snake_ladder", etc.
+  gameMode: text("game_mode").notNull().default("1v1"), // "1v1" or "group"
+  minPlayers: integer("min_players").default(2),
+  maxPlayers: integer("max_players").default(2),
+  betAmount: decimal("bet_amount", { precision: 18, scale: 9 }).notNull(),
+  totalPool: decimal("total_pool", { precision: 18, scale: 9 }).default("0"),
+  playingFee: decimal("playing_fee", { precision: 18, scale: 9 }).default("0.0001"),
+  status: text("status").notNull().default("waiting"), // "waiting", "in_progress", "completed", "cancelled"
+  winner: text("winner"), // wallet address of winner
+  createdBy: text("created_by").notNull(), // wallet address
+  createdAt: timestamp("created_at").defaultNow(),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  gameData: text("game_data"), // JSON data specific to each game type
+  canCancelAfter: timestamp("can_cancel_after"), // 5 minutes after creation
+  isPrivate: boolean("is_private").default(false),
+  roomCode: text("room_code"),
+});
+
+export const gameTransactions = pgTable("game_transactions", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  toAddress: text("to_address").notNull(),
+  amount: decimal("amount", { precision: 18, scale: 9 }).notNull(),
+  type: text("type").notNull(), // "payout", "fee", "refund"
+  txHash: text("tx_hash"),
+  status: text("status").default("pending"), // "pending", "completed", "failed"
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const sideBets = pgTable("side_bets", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  bettor: text("bettor").notNull(), // wallet address
+  betOnWinner: text("bet_on_winner").notNull(), // wallet address they're betting on
+  betAmount: decimal("bet_amount", { precision: 18, scale: 9 }).notNull(),
+  payout: decimal("payout", { precision: 18, scale: 9 }),
+  isWon: boolean("is_won"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   walletAddress: true,
@@ -276,6 +321,34 @@ export const insertGameStatusSchema = createInsertSchema(gameStatuses).pick({
   lockedBy: true,
 });
 
+export const insertGameSchema = createInsertSchema(games).pick({
+  gameType: true,
+  gameMode: true,
+  minPlayers: true,
+  maxPlayers: true,
+  betAmount: true,
+  playingFee: true,
+  createdBy: true,
+  gameData: true,
+  isPrivate: true,
+  roomCode: true,
+});
+
+export const insertGameTransactionSchema = createInsertSchema(gameTransactions).pick({
+  gameId: true,
+  toAddress: true,
+  amount: true,
+  type: true,
+  txHash: true,
+});
+
+export const insertSideBetSchema = createInsertSchema(sideBets).pick({
+  gameId: true,
+  bettor: true,
+  betOnWinner: true,
+  betAmount: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
@@ -304,3 +377,9 @@ export type InsertCollectorBot = z.infer<typeof insertCollectorBotSchema>;
 export type CollectorBot = typeof collectorBots.$inferSelect;
 export type InsertGameStatus = z.infer<typeof insertGameStatusSchema>;
 export type GameStatus = typeof gameStatuses.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;
+export type Game = typeof games.$inferSelect;
+export type InsertGameTransaction = z.infer<typeof insertGameTransactionSchema>;
+export type GameTransaction = typeof gameTransactions.$inferSelect;
+export type InsertSideBet = z.infer<typeof insertSideBetSchema>;
+export type SideBet = typeof sideBets.$inferSelect;
