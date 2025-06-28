@@ -1,0 +1,110 @@
+Implement a payout system for Nightfall Casino where:
+
+Core Logic:
+
+When a game ends and a player wins:
+
+The total pooled SOL (from all players) is calculated.
+
+A fixed playing fee of 0.0001 SOL is deducted before sending the payout to the winner.
+
+The remaining SOL (after fee deduction) is sent to the winner’s wallet.
+
+The playing fee (0.0001 SOL) is sent to the designated admin/fee wallet:
+GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb
+
+
+Benefits & Constraints:
+
+This avoids needing a second transaction to charge users manually, saving Solana network fees (gas).
+
+Only one transaction is used: both winner payout and fee deduction.
+
+This system supports any game where the winner receives pooled SOL (e.g., Coin Flip, Snake & Ladder, Dice Duel, etc.).
+
+
+
+---
+
+Flow Breakdown:
+
+1. Game ends → winner is determined.
+
+
+2. Backend calculates:
+
+totalWinnings = betAmount * numberOfPlayers
+
+playingFee = 0.0001 SOL
+
+netPayout = totalWinnings - playingFee
+
+
+
+3. Send netPayout to the winner’s wallet.
+
+
+4. Send playingFee to the admin/fee wallet: GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb.
+
+
+
+
+---
+
+Requirements:
+
+Use Solana Web3.js or compatible wallet handler for transaction signing.
+
+Prevent double payouts by tracking each game’s payout status using Supabase.
+
+Add backend logic to:
+
+Validate winner’s wallet
+
+Record payout timestamp
+
+Log fee transfer amount and TXID
+
+
+Ensure accurate balance checking before sending funds.
+
+
+
+---
+
+Database Structure (Supabase):
+
+Create or update the following tables:
+
+games table: | Column          | Type     | Notes                                 | |------------------|----------|----------------------------------------| | id               | UUID     | Game ID                                | | players          | Array    | List of player wallet addresses        | | winner           | String   | Winner’s wallet address                | | bet_amount       | Float    | Individual bet amount (in SOL)         | | total_pool       | Float    | bet_amount * players.length         | | fee_deducted     | Boolean  | true once payout is complete         | | payout_sent      | Boolean  | Avoid double payouts                   | | payout_time      | Timestamp| Logged when payout is completed        |
+
+transactions table: | Column         | Type      | Notes                                 | |----------------|-----------|----------------------------------------| | id             | UUID      | TX ID or internal reference            | | game_id        | UUID      | Linked game                            | | to_address     | String    | Recipient wallet (winner or admin)     | | amount         | Float     | Amount sent (in SOL)                   | | type           | Enum      | payout or fee                      | | timestamp      | Timestamp |                                        |
+
+
+---
+
+Smart Payout Calculation (Example):
+
+const bet = 2; // SOL per player
+const players = 2;
+const totalPool = bet * players;
+const fee = 0.0001;
+const netPayout = totalPool - fee;
+
+Send 1.9999 SOL to winner
+
+Send 0.0001 SOL to fee wallet
+
+
+
+---
+
+Final Requirements:
+
+Use a secure method to sign transactions (e.g., server wallet, signer function).
+
+Ensure atomic execution: both winner and fee transfers happen in the same operation.
+
+Add error handling: if payout fails, log it and retry.
+
+All logic should be built compatible with Supabase backend and Vercel frontend.
