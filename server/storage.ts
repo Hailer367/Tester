@@ -1,9 +1,12 @@
 import { 
   users, chatMessages, gameStats, adminSettings, gameSettings, feeWallets, auditLogs,
+  shopItems, userInventory, purchaseLogs, collectorBots, gameStatuses,
   type User, type InsertUser, type ChatMessage, type InsertChatMessage, 
   type GameStats, type InsertGameStats, type AdminSetting, type InsertAdminSetting,
   type GameSetting, type InsertGameSetting, type FeeWallet, type InsertFeeWallet,
-  type AuditLog, type InsertAuditLog
+  type AuditLog, type InsertAuditLog, type ShopItem, type InsertShopItem,
+  type UserInventory, type InsertUserInventory, type PurchaseLog, type InsertPurchaseLog,
+  type CollectorBot, type InsertCollectorBot, type GameStatus, type InsertGameStatus
 } from "@shared/schema";
 
 export interface IStorage {
@@ -56,6 +59,34 @@ export interface IStorage {
   muteUser(userId: number, muted: boolean): Promise<User | undefined>;
   setUserVouchPercentage(userId: number, percentage: string): Promise<User | undefined>;
   adjustUserBalance(userId: number, amount: string): Promise<User | undefined>;
+  
+  // Shop operations
+  getShopItems(): Promise<ShopItem[]>;
+  getShopItem(id: number): Promise<ShopItem | undefined>;
+  createShopItem(item: InsertShopItem): Promise<ShopItem>;
+  updateShopItem(id: number, updates: Partial<ShopItem>): Promise<ShopItem | undefined>;
+  deleteShopItem(id: number): Promise<boolean>;
+  
+  // User inventory operations
+  getUserInventory(userId: number): Promise<UserInventory[]>;
+  addToInventory(inventory: InsertUserInventory): Promise<UserInventory>;
+  updateInventoryStatus(userId: number, itemId: number, status: string): Promise<UserInventory | undefined>;
+  
+  // Purchase operations
+  createPurchaseLog(log: InsertPurchaseLog): Promise<PurchaseLog>;
+  getUserPurchases(userId: number): Promise<PurchaseLog[]>;
+  
+  // Collector bot operations
+  getCollectorBots(): Promise<CollectorBot[]>;
+  getCollectorBot(id: number): Promise<CollectorBot | undefined>;
+  createCollectorBot(bot: InsertCollectorBot): Promise<CollectorBot>;
+  updateCollectorBot(id: number, updates: Partial<CollectorBot>): Promise<CollectorBot | undefined>;
+  deleteCollectorBot(id: number): Promise<boolean>;
+  
+  // Game status operations
+  getGameStatuses(): Promise<GameStatus[]>;
+  getGameStatus(gameType: string): Promise<GameStatus | undefined>;
+  updateGameStatus(gameType: string, updates: Partial<GameStatus>): Promise<GameStatus | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -66,11 +97,20 @@ export class MemStorage implements IStorage {
   private gameSettings: Map<string, GameSetting>;
   private feeWallets: Map<number, FeeWallet>;
   private auditLogs: Map<number, AuditLog>;
+  private shopItems: Map<number, ShopItem>;
+  private userInventory: Map<string, UserInventory>; // key: userId-itemId
+  private purchaseLogs: Map<number, PurchaseLog>;
+  private collectorBots: Map<number, CollectorBot>;
+  private gameStatuses: Map<string, GameStatus>;
   private currentUserId: number;
   private currentChatId: number;
   private currentGameStatsId: number;
   private currentFeeWalletId: number;
   private currentAuditLogId: number;
+  private currentShopItemId: number;
+  private currentInventoryId: number;
+  private currentPurchaseLogId: number;
+  private currentCollectorBotId: number;
 
   constructor() {
     this.users = new Map();
@@ -80,11 +120,20 @@ export class MemStorage implements IStorage {
     this.gameSettings = new Map();
     this.feeWallets = new Map();
     this.auditLogs = new Map();
+    this.shopItems = new Map();
+    this.userInventory = new Map();
+    this.purchaseLogs = new Map();
+    this.collectorBots = new Map();
+    this.gameStatuses = new Map();
     this.currentUserId = 1;
     this.currentChatId = 1;
     this.currentGameStatsId = 1;
     this.currentFeeWalletId = 1;
     this.currentAuditLogId = 1;
+    this.currentShopItemId = 1;
+    this.currentInventoryId = 1;
+    this.currentPurchaseLogId = 1;
+    this.currentCollectorBotId = 1;
     
     // Initialize default settings
     this.initializeDefaultSettings();
@@ -389,6 +438,178 @@ export class MemStorage implements IStorage {
       solBalance: newBalance.toString(),
       lastActivity: new Date()
     });
+  }
+
+  // Shop operations
+  async getShopItems(): Promise<ShopItem[]> {
+    return Array.from(this.shopItems.values());
+  }
+
+  async getShopItem(id: number): Promise<ShopItem | undefined> {
+    return this.shopItems.get(id);
+  }
+
+  async createShopItem(item: InsertShopItem): Promise<ShopItem> {
+    const id = this.currentShopItemId++;
+    const shopItem: ShopItem = {
+      id,
+      name: item.name,
+      category: item.category,
+      description: item.description,
+      rarity: item.rarity || "common",
+      priceInSOL: item.priceInSOL || "0",
+      unlockCondition: item.unlockCondition || null,
+      isUnlockable: item.isUnlockable ?? true,
+      isPurchasable: item.isPurchasable ?? false,
+      previewUrl: item.previewUrl || null,
+      isHidden: item.isHidden ?? false,
+      isSeasonal: item.isSeasonal ?? false,
+      createdAt: new Date(),
+    };
+    this.shopItems.set(id, shopItem);
+    return shopItem;
+  }
+
+  async updateShopItem(id: number, updates: Partial<ShopItem>): Promise<ShopItem | undefined> {
+    const item = this.shopItems.get(id);
+    if (!item) return undefined;
+
+    const updated: ShopItem = { ...item, ...updates };
+    this.shopItems.set(id, updated);
+    return updated;
+  }
+
+  async deleteShopItem(id: number): Promise<boolean> {
+    return this.shopItems.delete(id);
+  }
+
+  // User inventory operations
+  async getUserInventory(userId: number): Promise<UserInventory[]> {
+    return Array.from(this.userInventory.values()).filter(inv => inv.userId === userId);
+  }
+
+  async addToInventory(inventory: InsertUserInventory): Promise<UserInventory> {
+    const id = this.currentInventoryId++;
+    const key = `${inventory.userId}-${inventory.itemId}`;
+    const userInventory: UserInventory = {
+      id,
+      userId: inventory.userId,
+      itemId: inventory.itemId,
+      status: inventory.status || "owned",
+      unlockedAt: new Date(),
+    };
+    this.userInventory.set(key, userInventory);
+    return userInventory;
+  }
+
+  async updateInventoryStatus(userId: number, itemId: number, status: string): Promise<UserInventory | undefined> {
+    const key = `${userId}-${itemId}`;
+    const inventory = this.userInventory.get(key);
+    if (!inventory) return undefined;
+
+    const updated: UserInventory = { ...inventory, status };
+    this.userInventory.set(key, updated);
+    return updated;
+  }
+
+  // Purchase operations
+  async createPurchaseLog(log: InsertPurchaseLog): Promise<PurchaseLog> {
+    const id = this.currentPurchaseLogId++;
+    const purchaseLog: PurchaseLog = {
+      id,
+      userId: log.userId,
+      itemId: log.itemId,
+      amountSOL: log.amountSOL,
+      txHash: log.txHash || null,
+      timestamp: new Date(),
+    };
+    this.purchaseLogs.set(id, purchaseLog);
+    return purchaseLog;
+  }
+
+  async getUserPurchases(userId: number): Promise<PurchaseLog[]> {
+    return Array.from(this.purchaseLogs.values())
+      .filter(log => log.userId === userId)
+      .sort((a, b) => (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0));
+  }
+
+  // Collector bot operations
+  async getCollectorBots(): Promise<CollectorBot[]> {
+    return Array.from(this.collectorBots.values());
+  }
+
+  async getCollectorBot(id: number): Promise<CollectorBot | undefined> {
+    return this.collectorBots.get(id);
+  }
+
+  async createCollectorBot(bot: InsertCollectorBot): Promise<CollectorBot> {
+    const id = this.currentCollectorBotId++;
+    const collectorBot: CollectorBot = {
+      id,
+      username: bot.username,
+      profilePicture: bot.profilePicture,
+      walletPrivateKey: bot.walletPrivateKey, // Should be encrypted in real implementation
+      allowedGames: bot.allowedGames,
+      winProbability: bot.winProbability,
+      gameInterval: bot.gameInterval,
+      canPlayMultiple: bot.canPlayMultiple ?? false,
+      minStakeSOL: bot.minStakeSOL,
+      maxStakeSOL: bot.maxStakeSOL,
+      canBuyShopItems: bot.canBuyShopItems ?? false,
+      allowedShopItems: bot.allowedShopItems || [],
+      ghostMode: bot.ghostMode ?? false,
+      botType: bot.botType || "COLLECTOR",
+      isActive: false,
+      activeSchedule: bot.activeSchedule || null,
+      createdBy: bot.createdBy,
+      createdAt: new Date(),
+    };
+    this.collectorBots.set(id, collectorBot);
+    return collectorBot;
+  }
+
+  async updateCollectorBot(id: number, updates: Partial<CollectorBot>): Promise<CollectorBot | undefined> {
+    const bot = this.collectorBots.get(id);
+    if (!bot) return undefined;
+
+    const updated: CollectorBot = { ...bot, ...updates };
+    this.collectorBots.set(id, updated);
+    return updated;
+  }
+
+  async deleteCollectorBot(id: number): Promise<boolean> {
+    return this.collectorBots.delete(id);
+  }
+
+  // Game status operations
+  async getGameStatuses(): Promise<GameStatus[]> {
+    return Array.from(this.gameStatuses.values());
+  }
+
+  async getGameStatus(gameType: string): Promise<GameStatus | undefined> {
+    return this.gameStatuses.get(gameType);
+  }
+
+  async updateGameStatus(gameType: string, updates: Partial<GameStatus>): Promise<GameStatus | undefined> {
+    const status = this.gameStatuses.get(gameType);
+    if (!status) {
+      // Create new status if it doesn't exist
+      const newStatus: GameStatus = {
+        id: this.gameStatuses.size + 1,
+        gameType,
+        isLocked: false,
+        lockReason: null,
+        lockedBy: null,
+        lockedAt: null,
+        ...updates
+      };
+      this.gameStatuses.set(gameType, newStatus);
+      return newStatus;
+    }
+
+    const updated: GameStatus = { ...status, ...updates };
+    this.gameStatuses.set(gameType, updated);
+    return updated;
   }
 }
 

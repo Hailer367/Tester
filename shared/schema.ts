@@ -101,6 +101,69 @@ export const gameParticipants = pgTable("game_participants", {
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
+export const shopItems = pgTable("shop_items", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // titles, borders, sounds, effects, coins, backgrounds, achievements
+  description: text("description").notNull(),
+  rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary, celestial
+  priceInSOL: decimal("price_in_sol", { precision: 18, scale: 9 }).default("0"),
+  unlockCondition: text("unlock_condition"), // JSON string with unlock requirements
+  isUnlockable: boolean("is_unlockable").default(true),
+  isPurchasable: boolean("is_purchasable").default(false),
+  previewUrl: text("preview_url"),
+  isHidden: boolean("is_hidden").default(false),
+  isSeasonal: boolean("is_seasonal").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userInventory = pgTable("user_inventory", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  itemId: integer("item_id").references(() => shopItems.id).notNull(),
+  status: text("status").notNull().default("owned"), // owned, unlocked, purchased, equipped
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+});
+
+export const purchaseLogs = pgTable("purchase_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  itemId: integer("item_id").references(() => shopItems.id).notNull(),
+  amountSOL: decimal("amount_sol", { precision: 18, scale: 9 }).notNull(),
+  txHash: text("tx_hash"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const collectorBots = pgTable("collector_bots", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  profilePicture: text("profile_picture").notNull(),
+  walletPrivateKey: text("wallet_private_key").notNull(), // encrypted
+  allowedGames: text("allowed_games").array().notNull(),
+  winProbability: decimal("win_probability", { precision: 5, scale: 2 }).notNull(),
+  gameInterval: integer("game_interval").notNull(), // minutes between games
+  canPlayMultiple: boolean("can_play_multiple").default(false),
+  minStakeSOL: decimal("min_stake_sol", { precision: 18, scale: 9 }).notNull(),
+  maxStakeSOL: decimal("max_stake_sol", { precision: 18, scale: 9 }).notNull(),
+  canBuyShopItems: boolean("can_buy_shop_items").default(false),
+  allowedShopItems: text("allowed_shop_items").array().default([]),
+  ghostMode: boolean("ghost_mode").default(false),
+  botType: text("bot_type").notNull().default("COLLECTOR"), // COLLECTOR, MILE_COLLECTOR
+  isActive: boolean("is_active").default(false),
+  activeSchedule: text("active_schedule"), // JSON string with time ranges
+  createdBy: text("created_by").notNull(), // admin wallet
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const gameStatuses = pgTable("game_statuses", {
+  id: serial("id").primaryKey(),
+  gameType: text("game_type").notNull().unique(),
+  isLocked: boolean("is_locked").default(false),
+  lockReason: text("lock_reason"),
+  lockedBy: text("locked_by"), // admin wallet
+  lockedAt: timestamp("locked_at"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   walletAddress: true,
@@ -161,6 +224,58 @@ export const insertGameParticipantSchema = createInsertSchema(gameParticipants).
   position: true,
 });
 
+export const insertShopItemSchema = createInsertSchema(shopItems).pick({
+  name: true,
+  category: true,
+  description: true,
+  rarity: true,
+  priceInSOL: true,
+  unlockCondition: true,
+  isUnlockable: true,
+  isPurchasable: true,
+  previewUrl: true,
+  isHidden: true,
+  isSeasonal: true,
+});
+
+export const insertUserInventorySchema = createInsertSchema(userInventory).pick({
+  userId: true,
+  itemId: true,
+  status: true,
+});
+
+export const insertPurchaseLogSchema = createInsertSchema(purchaseLogs).pick({
+  userId: true,
+  itemId: true,
+  amountSOL: true,
+  txHash: true,
+});
+
+export const insertCollectorBotSchema = createInsertSchema(collectorBots).pick({
+  username: true,
+  profilePicture: true,
+  walletPrivateKey: true,
+  allowedGames: true,
+  winProbability: true,
+  gameInterval: true,
+  canPlayMultiple: true,
+  minStakeSOL: true,
+  maxStakeSOL: true,
+  canBuyShopItems: true,
+  allowedShopItems: true,
+  ghostMode: true,
+  botType: true,
+  activeSchedule: true,
+  createdBy: true,
+});
+
+export const insertGameStatusSchema = createInsertSchema(gameStatuses).pick({
+  gameType: true,
+  isLocked: true,
+  lockReason: true,
+  lockedBy: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
@@ -179,3 +294,13 @@ export type InsertFeeWallet = z.infer<typeof insertFeeWalletSchema>;
 export type FeeWallet = typeof feeWallets.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertShopItem = z.infer<typeof insertShopItemSchema>;
+export type ShopItem = typeof shopItems.$inferSelect;
+export type InsertUserInventory = z.infer<typeof insertUserInventorySchema>;
+export type UserInventory = typeof userInventory.$inferSelect;
+export type InsertPurchaseLog = z.infer<typeof insertPurchaseLogSchema>;
+export type PurchaseLog = typeof purchaseLogs.$inferSelect;
+export type InsertCollectorBot = z.infer<typeof insertCollectorBotSchema>;
+export type CollectorBot = typeof collectorBots.$inferSelect;
+export type InsertGameStatus = z.infer<typeof insertGameStatusSchema>;
+export type GameStatus = typeof gameStatuses.$inferSelect;

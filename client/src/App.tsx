@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
 import Home from "@/pages/home";
 import AdminPanel from "@/pages/admin";
+import PrivacyPolicy from "@/pages/privacy";
+import TermsOfService from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +24,8 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/admin" component={AdminPanel} />
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/terms" component={TermsOfService} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
