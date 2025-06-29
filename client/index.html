@@ -23,6 +23,32 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Buffer polyfill for Solana Web3.js compatibility
+      if (typeof global === 'undefined') {
+        var global = globalThis;
+      }
+      if (typeof Buffer === 'undefined') {
+        globalThis.Buffer = {
+          from: function(data, encoding) {
+            if (encoding === 'hex') {
+              const bytes = new Uint8Array(data.length / 2);
+              for (let i = 0; i < data.length; i += 2) {
+                bytes[i / 2] = parseInt(data.substr(i, 2), 16);
+              }
+              return bytes;
+            }
+            if (typeof data === 'string') {
+              return new TextEncoder().encode(data);
+            }
+            return new Uint8Array(data);
+          },
+          alloc: function(size) {
+            return new Uint8Array(size);
+          }
+        };
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
