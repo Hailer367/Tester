@@ -58,7 +58,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
         setUser(parsedUser);
         setPublicKey(new PublicKey(savedWalletAddress));
         setConnected(true);
-        updateBalance();
+        updateBalance().catch(console.error);
       } catch (error) {
         console.error("Error restoring wallet session:", error);
         localStorage.removeItem("walletAddress");
@@ -132,7 +132,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
         localStorage.setItem("walletAddress", walletPublicKey.toString());
         localStorage.setItem("user", JSON.stringify(existingUser));
         
-        await updateBalance();
+        await updateBalance().catch(console.error);
       } catch (error) {
         // User doesn't exist, they need to register
         setConnected(true);
