@@ -25,9 +25,14 @@ import {
   Wallet,
   ChevronDown,
   Crown,
-  Zap
+  Zap,
+  Bot,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SettingsPanel } from "@/components/settings/settings-panel";
+import { ShopSystem } from "@/components/shop/shop-system";
+import { CollectorBotPanel } from "@/components/admin/collector-bot-panel";
 
 interface MainNavProps {
   onlineCount?: number;
@@ -192,23 +197,13 @@ export function MainNav({
 
             {/* Quick Actions */}
             <div className="hidden sm:flex items-center gap-2">
-              {QUICK_ACTIONS.map((action) => {
-                const Icon = action.icon;
-                const onClick = action.id === "shop" ? onOpenShop : onOpenSettings;
-                
-                return (
-                  <Button
-                    key={action.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClick}
-                    className="p-2 text-gray-400 hover:text-white group"
-                    title={action.description}
-                  >
-                    <Icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  </Button>
-                );
-              })}
+              {isWalletConnected && (
+                <>
+                  <ShopSystem />
+                  <SettingsPanel />
+                  <CollectorBotPanel />
+                </>
+              )}
             </div>
 
             {/* Wallet Section */}

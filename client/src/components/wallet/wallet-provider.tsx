@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { apiRequest } from "@/lib/queryClient";
+import { UserRegistration } from "@/components/registration/user-registration";
 import type { User } from "@shared/schema";
 
 interface WalletContextType {
@@ -14,6 +15,8 @@ interface WalletContextType {
   showWelcome: boolean;
   setShowWelcome: (show: boolean) => void;
   updateBalance: () => Promise<void>;
+  showRegistration: boolean;
+  setShowRegistration: (show: boolean) => void;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -37,6 +40,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [solBalance, setSolBalance] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
 
   // Solana RPC connection
   const connection = new Connection(
@@ -136,6 +140,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       } catch (error) {
         // User doesn't exist, they need to register
         setConnected(true);
+        setShowRegistration(true);
         localStorage.setItem("walletAddress", walletPublicKey.toString());
       }
       
@@ -205,12 +210,18 @@ export function WalletProvider({ children }: WalletProviderProps) {
     disconnect,
     showWelcome,
     setShowWelcome,
-    updateBalance
+    updateBalance,
+    showRegistration,
+    setShowRegistration
   };
 
   return (
     <WalletContext.Provider value={value}>
       {children}
+      <UserRegistration 
+        isOpen={showRegistration} 
+        onClose={() => setShowRegistration(false)} 
+      />
     </WalletContext.Provider>
   );
 }

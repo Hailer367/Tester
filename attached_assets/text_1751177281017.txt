@@ -1,0 +1,1152 @@
+Create a Settings Panel for the Nightfall Casino website.
+
+This panel should match the elegant, dark, neon-night anime theme inspired by Call of the Night. Use Tailwind CSS and smooth, subtle animations. It should be mobile-responsive, lightweight, and integrated cleanly into the current user dashboard or top-right menu.
+
+
+---
+
+️ Sections & Features to Include:
+
+1.  Sound Settings
+
+Master Sound: ON / OFF
+
+Select active Sound Pack (from unlocked sound packs in user data)
+
+Enable ambient background audio loop (ON / OFF)
+
+
+2. ️ Interface & Visuals
+
+Choose current HUD Theme (from unlocked HUD themes)
+
+Select Profile Border
+
+Select Background Theme
+
+Animated Cursor: ON / OFF
+
+Background Particles: ON / OFF
+
+Text Size: Small / Medium / Large
+
+
+3.  Privacy & Chat
+
+Chat Visibility: ON / OFF
+
+Ghost Mode: ON / OFF
+
+> ⚠️ Make it very clear that when Ghost Mode is active, users will not be eligible for streak-based rewards, badges, leaderboard streak tracking, or any achievements that rely on public visibility.
+
+
+
+Block Mentions: ON / OFF
+
+Chat Toast Notifications: ON / OFF
+
+
+4.  Gameplay Preferences
+
+Wager Warnings: Enable warning popup if betting more than 0.5 SOL
+
+Live Toasts (e.g., win/loss alerts): Show / Hide
+
+
+> ⚠️ Do not include a Moon/Star preference for Coin Flip — players choose sides directly in the game setup.
+
+
+
+> ⚠️ Do not include side wager toggles — any user can side-wager on ongoing Snake & Ladder games by design.
+
+
+
+5.  Account Management
+
+Upload new profile picture (image file input — must replace current avatar)
+
+Disconnect Wallet
+
+View Winnings Summary (modal popup)
+
+Links to:
+
+Terms of Service
+
+Privacy Policy
+
+
+
+---
+
+️ Behavior & Technical Notes:
+
+All user preferences should be saved to Supabase (if backend is active).
+
+If not, fallback to localStorage with a syncing mechanism later.
+
+All changes should auto-save with a toast notification.
+
+Use glowing tabs, slide-in modals, or a clean sidebar layout for organization.
+
+Use Tailwind transitions, hover glows, and soft animations to keep the theme immersive.
+
+Additional features fot the website:
+
+Make everything optimized for better and smooth animation and play for both mobile and desktop.
+
+Make sure the website is fully devoid of loopholes users can exploit in any way.
+
+Add a player counting system that shows currently online players for public view on the website.
+
+Add a new bot panel for admins (Known as "COLLECTORS") that only admins can access where admins can make a bot by simply clicking on a button that says "Make a COLLECTOR".The panel will have the same style as the website and is also organized for better navigation and is also optimized for better use.The bot will look just ike normal users for normal users, but admins will be able to identify the bot in leaderboard and games by a Golden Halo surrounding it.Admins can access the bot and be able to see its designated wallet's, its chart, history of plays and transactions.Admins will be able to change its pfp by uploading a picture from their files even after the bot is made.In the bot panel admins can activate or disable a bot by a simple switch and will also be able to see active bots, the games they are currently playing, available SOL  balance, its chart, if its active or inactive.The bot will be counted as a user like any other user by backend.Admins can also make the bot reach a specified amount of SOL by winning against other users by giving it a certain winning and losing pattern by drawing its future chart and the bot will follow the chart by adjusting its winning and losing probability( by making it 0% or 100% for absolute precision) and eventually reach its designated milestone and admins will set the range of SOL the bot will use and the bot will choose the right amount of sol to use in order to complete the candlestick,admins can draw the chart by using line chart or candlestick chart, make the drawing process of chart for the bot simple and easy to do for the admins, also add a calendar feature for admins to precisely add when the bot (MILE COLLECTOR) will be active and not, in the calendar feature admins will be able to set in which day and in which time the bot will be active and not, in the calendar feature admins will be able to choose from the timezone of USA, UK and Mexico, after admins choose the timezone they want and when the bot will be active and not they will be asked to draw the chart using either line graph or candlestick graph, everything should be organized,  after the bot reaches its specified milestone it will be inactive untill the admins give it another milestone to reach by drawing a new chart for it again, such bots ( COLLECTORS that are designated to reach a certain milestone) will be placed in a separate place from normal COLLECTORS and will be named as "MILE COLLECTORS" and will also have a blue Halo around them for only admins to notice them with. Playing fees will also apply for the bot if it wins. Every kind of bot can not join a game created by users untill at least 7 seconds have passed. Under any circumstances the bots will not have a visible feature that is different from normal users, they will look like normal users would.Two or more bots can be given the same Private Key of a solflare or a phantom wallet and will have complete controll of the wallet (accepting transactions). When admins draw the chart there will be an estimation of how much SOL the bot can make by analyzing the timeintervals its active in, its allowed range of SOL to use and the wins and losses it incurres based on the chart. For normal COLLECTORS its not possible to draw a chart as its only available for MILE COLLECTORS, but filling in its winning and losing probability is mandatory. When naming a bot if the username is already taken by another user, a transparent text will appear that says "Username already taken" and the admin will not be able to name the bot that name. In the calendar feature for the bot, the calendar will look like a normal simplistic calendar that has the same style and vibe as the website, and in the calendar admins must click on the dates ( the dates will turn transparent when clicked) and set the time for the bot to be  active for each date or for all the ones clicked, and as such the bot will be actively betting on the date and time it was given, after admins choose the date and time they will be forced to draw the chart the bot must follow, they will either use line chart or candlestick to draw it, after the drawing is complete and the bot is activated the bot will analyze the date and time and amount of SOL range (e.g: between 2 and 7) it was given and do its absolute best to completely imitate the chart it was given by winning and losing (by adjusting its winning and losing chance to 0% and 100% for absolute prcision). In the COLLECTORS panel there should be a transparent book icon that when clicked opens a mini UI that shows a complete guide that shows in both pictures and text about how to make a COLLECTOR and a MILE COLLECTOR.
+
+
+
+
+
+
+when admins make a bot (COLLECTOR) they are required to fill in information about the bot
+it includes:
+The bot's username
+The bot's pfp
+What games the bot is allowed to stake and play on
+The winning/losing probability of the bot
+The time interval it takes for the bot to join/create games so to not make the bot spam 
+If the bot will play two or more games at the same time
+The range of SOL its allowed to stake ( e.g: between 2 and 7 SOL) for each game its allowed to play
+If the bot is allowed to buy shop items, if so which ones and when
+A Private Key of a solflare or phantom wallet for it to access and use the SOL that's inside the wallet
+If the bot is in ghost mode or not
+If the bot is a MILE COLLECTOR or a COLLECTOR
+When its active and not( not mandatory for normal COLLECTORS)
+
+
+
+After the bot is made, admins can activate it or let is sit unless its activated
+
+
+
+
+The bot can:
+Place bets on games and win/lose
+Unlock shop items that are won, not bought(unless its allowed to)
+Access the wallet that its allowed to and confirm transactions to stake or buy shop items
+
+
+
+
+
+
+The bot can not: 
+Interact with other users
+Write text in the chat
+Join a game made by other bots
+
+
+
+The entire procedure of making the collectors:
+Admins go to the "COLLECTOR" panel, they click a button that says "Make a COLLECTOR", a mini UI will open with spaces for informations to be filled with, admins will fill in the required information, they click a button that says "Done", the bot will work based on the information that it was given
+
+
+
+Create two legal pages for my gambling website Nightfall Casino:
+
+1. A Privacy Policy
+
+
+2. A Terms of Service
+
+
+
+Both pages should be styled to match the site’s dark, elegant, anime-inspired aesthetic.
+
+Requirements for the Privacy Policy:
+
+Clearly state what data is collected: wallet address, gameplay activity, shop usage, and chat logs.
+
+Explain that all wallet interactions are handled externally through Solana-compatible wallets, and private keys are never accessed.
+
+State that data is stored securely using a backend like Supabase or equivalent.
+
+Include that gameplay and wallet activity may be logged for fairness and anti-cheat systems.
+
+
+Include standard sections like “Information Collected,” “How Data is Used,” “Security,” and “Data Retention.”
+
+Do not include any contact information, admin wallet addresses, or local/international legal references.
+
+
+Requirements for the Terms of Service:
+
+Include eligibility requirements (18+ only).
+
+Explain that all games involve risk, and users should not wager SOL they can't afford to lose.
+
+State that playing fees of 0.0001 SOL are deducted only after a win, and transaction/gas fees are automatically estimated and included.
+
+Make it clear that winnings are paid directly from losing players' staked amounts, not from the platform.
+
+Emphasize that all game outcomes are final, and there are no refunds.
+
+Explain admin rights to moderate users, change fees or gameplay settings, and control cosmetic/shop systems.
+
+Include community guidelines for chat and multiplayer interactions.
+
+Do not include admin wallet addresses, contact info, or legal jurisdiction sections.
+
+
+Both pages should:
+
+Be readable, well-formatted, and mobile responsive.
+
+Fit into the site’s visual identity (dark mode, clean UI).
+
+Use Tailwind CSS for styling.
+
+Be added to routes like /privacy and /terms.
+
+Users must check and agree to these terms before registration, and must also fill out their username and avatar (pfp), until registration users can not stake any SOL but they can spectate the website.
+
+
+After users register, show short a welcoming dialogue that is befitting of the website and open a pop up UI that is the same style as the website that shows users a quick tour of the website, also make a book icon somewhere that makes sense that shows users how each game works using pictures and words.
+
+
+
+Make a fitting icon for the website to be known with and make it go with the website's style and vibe, make sure you don't make a mistake because the icon will be the face of the website so make it fitting 
+
+Also add a feature where admins can lock and hide available games and also giving a reason for the lockdown of the game that will be shown publicly.
+
+
+Add a complete shop system to Nightfall Casino that includes unlockable items based on gameplay and premium items that cost SOL. The shop must reflect the site’s anime-night aesthetic and allow for full admin control.
+
+
+
+
+---
+
+ Core Features:
+
+ Unlockables:
+
+Players unlock shop items automatically by hitting key milestones. Each item’s theme must match how it was unlocked. Example unlock triggers:
+
+Win streaks → titles like “Moonlit Champion”
+
+Loss streaks → skins like “Shadowed Flip” or titles like “Fallen Star”
+
+Total wins/losses
+
+Number of games played
+
+Easter eggs hidden in the UI
+
+Total SOL wagered
+
+
+> On unlock:
+
+
+
+Show glowing toast popup: "You unlocked Shadowed Flip!"
+
+Add item to player inventory (no SOL payment required)
+
+
+
+---
+
+ SOL-Purchasable Items:
+
+Some shop items (especially rare skins and effects) should cost SOL to purchase.
+
+Price must be shown clearly (e.g., "0.01 SOL")
+
+On purchase:
+
+Deduct SOL from connected wallet
+
+Send it to a designated fee-collection wallet estimating the transaction fee as well
+Example: if the price is 5 SOL and 
+
+Grant the item to user
+
+Save a record in backend (purchase log)
+
+
+
+> Example:
+
+
+
+“Sakura Moon Coin” skin → 0.01 SOL
+
+“Rainy Night Background” → 0.005 SOL
+
+“Midnight Echo Sound Pack” → 0.002 SOL
+
+
+
+---
+
+ Shop Categories
+
+1. User Titles
+
+
+2. Profile Borders
+
+
+3. Sound Packs
+
+
+4. Avatar Effects
+
+
+5. Coin Skins (⚠️ some are SOL-purchasable)
+
+
+6. Background Themes
+
+
+7. Hidden Unlocks / Achievements
+
+
+
+Each item should show:
+
+Icon or animated preview
+
+Title
+
+"Owned", "Locked", or "Buy for X SOL"
+
+Tooltip explaining how to unlock or how much it costs
+
+
+
+---
+
+️ Admin Control Panel Extensions
+
+Admins can:
+
+Add/edit/delete shop items
+
+Set price (SOL or 0)
+
+Define unlock conditions for each item (e.g., “Win 10 times in a row”)
+
+Mark as public/seasonal/hidden
+
+See:
+
+Total number of players who unlocked/bought an item
+
+SOL revenue from shop purchases
+
+Player inventories
+
+
+Admins can use all items freely without unlocking or buying
+
+
+
+---
+
+ Backend Requirements
+
+Tables to include in Supabase:
+
+ShopItems:
+
+id, name, category, description, priceInSOL, unlockCondition, isUnlockable, isPurchasable, previewUrl, isHidden
+
+
+UserInventory:
+
+userId, itemId, status (owned/unlocked/purchased), timestamp
+
+
+PurchaseLogs:
+
+userId, itemId, amountSOL, timestamp, txHash
+
+
+AdminWalletSettings:
+
+designatedShopWallet
+
+
+
+
+---
+
+ UI/UX Style
+
+Layout in neon-glow grid or animated carousel
+
+Background: translucent shop interface with dark overlay and animated fog
+
+Filter by category tabs and by rearity as common, rare, epic and legendary each with their own colour to identify them with 
+
+Items shimmer when hovered
+
+“Unlock” = pulse glow
+
+“Buy” = glowing gold button with mini SOL logo
+
+Inventory has an “Equip” button for each owned item
+
+
+
+---
+
+️ Security Notes
+
+All SOL purchases require confirmed wallet signature
+
+Purchases are recorded in backend
+
+Admin-only fields are locked behind wallet-based role access
+
+add these as shop items and make sure to make them befitting of their names:
+
+️ USER TITLES:
+
+Moonlit Drifter: Win 5 games in a row (Common)
+Fallen Star: Lose 5 games in a row (Common)
+Night Blazer: Wager a total of 5 SOL (Rare)
+Twilight Gambler: Play 50 games total (Common)
+Lucky Phantom: Win Snake & Ladder with <5 moves  (Rare)
+Dusk Reaper: Lose 3 in a row, win the 4th (Rare)
+Shadowed Prophet: Unlock an Easter Egg (Rare)
+High Roller: Place a bet over 1 SOL (Rare)
+Nightcrawler: Play after midnight local time (Common)
+Wager Warlord: Bet a total of 10 SOL (Epic)
+The Gambit: Win a Dice Duel with double 6s (Epic)
+Ghosted: Disconnect mid-game 3+ times (Fun)
+Half Moon Howler: Win with wallet balance <0.01 SOL (Rare)
+Urban Myth: Unlock 2+ hidden items (Rare)
+Calculated Chaos: Win 3 different game types in a row (Epic)
+Broken Reflection: Alternate win/loss 5 times (Rare)
+Eternal Gambler: Play 100 games without skipping a day for a week (Legendary)
+Omnibettor: Win 10 times in every game mode in one day (Legendary)
+
+
+---
+
+ PROFILE BORDERS:
+
+Neon Pulse: Win 10 games total (Common)
+Lunar Fade: Lose 15 games (Common)
+Sapphire Crown: Purchase: 0.01 SOL (Rare)
+Solar Flare: Purchase: 0.015 SOL (Rare)
+Mist Veil: Play 30 games (Common)
+Void Circuit: Purchase: 0.02 SOL (Epic)
+Spiral Mist: Win 2 games with 1 SOL+ bets (Epic)
+Serpent Neon: Win Snake & Ladder using a final-ladder (Rare)
+Halo Fade: Purchase: 0.008 SOL (Common)
+Fractured Pulse: Lose 7 games total (Common)
+Digital Bloom: Spend a total of 7 hours on the website (Rare)
+Time Fracture: Top 3 on leaderboard 30 days in a row (Legendary)
+Bloodstreak Chain: Lose 50 bets in a row (Legendary)
+
+
+---
+
+ SOUND PACKS:
+
+City Whispers: Default (Common)
+Dream Synth: Purchase: 0.005 SOL (Common)
+Rain Walker: Lose 10 games in a night (Common)
+Starlight Drift: Purchase: 0.007 SOL (Rare)
+Misty Alley: Unlock via Easter egg (Rare)
+Synth Alley: Purchase: 0.006 SOL (Rare)
+Bridge Echo: Win 2 Snake & Ladder games at night (Rare)
+Flash Noir: Purchase: 0.0075 SOL (Rare)
+Lantern Wind: Hidden leaderboard interaction (Epic)
+Bass of the Void: Purchase: 0.5 SOL (Epic)
+Echo of the Fallen: Lose over 10 SOL across 3 game types (Legendary)
+Void Verse: Unlock all other sound packs & win 5 streaks in each (Legendary)
+Nebula Sky: Equip 4 Legendary items (Celestial)
+
+
+---
+
+✨ AVATAR EFFECTS:
+
+Soft Sparkle: Win 3 in a row (Common)
+Star Pulse: Purchase: 0.008 SOL (Common)
+Shadow Trail: Play 100 rounds (Common)
+Moon Burst: Purchase: 0.015 SOL (Rare)
+Crystal Pulse: Win after 3 losses (Rare)
+Falling Stars: Purchase: 0.012 SOL (Rare)
+Glitched Halo: Win while being spectated (Epic)
+Heaven Slash: Purchase:0.05 SOL (Epic)
+Eclipse Veil: Purchase: 0.05SOL (Epic)
+Lightning Thread: Place 3 fast bets in under 2 minutes (Rare)
+Starcore Spiral: Win 10 Snake & Ladder in a row vs different users (Legendary)
+Afterimage Drift: Play for 6 hours straight and win final game (Legendary)
+Dripping Blood: Lose a total of 100 games (Celestial)
+
+
+---
+
+ COIN SKINS (Moon Flip):
+
+Lunar Gold: Purchase: 0.012 SOL (Common)
+Celestial Star: Win 10 coin flips using "Moon" (Rare)
+Sakura Coin: Purchase: 0.02 SOL (Rare)
+Eclipse Ember: Unlock via secret flip (Rare)
+Shadow-Mask Coin: Win 3 Moon Flips with Moon in a row (Rare)
+Obsidian Crescent: Purchase: 0.011 SOL (Epic)
+Stellar Drip: Win while top 3 on leaderboard (Epic)
+Lava Bloom: Purchase: 0.015 SOL (Rare)
+Fogbound Star: Lose streak of 4 Moon Flips (Common)
+Celestial Eclipse: Win 100 Moon Flips using only “Moon” (Legendary)
+True Duality: Maintain 50/50 win/loss over 200 games (Legendary)
+True Gambler: Bet 100 or more SOL at once in a game (Celestial)
+
+---
+
+️ BACKGROUND THEMES:
+
+Midnight Tokyo: Default (Common)
+Neon Drift: Purchase: 0.01 SOL (Common)
+Rainy Rooftop: Win 2 games while muted (Common)
+Festival Lights: Purchase: 0.02 SOL (Rare)
+Fog District: Win a Mystery Box Duel (Rare)
+Market District: Purchase: 0.02 SOL (Rare)
+Temple Mirage: Win Dice Duel after losing Snake & Ladder (Rare)
+Crimson Citylights: Purchase: 0.018 SOL (Rare)
+Cosmic Gateway: Discover 3 shop items in 1 session (Epic)
+Sakura Leaf Rain: Purchase:0.05 SOL (Epic)
+Mask Parade: Purchase: 0.025 SOL (Epic)
+Galaxy Zero: Reach #1 on leaderboard 3 times (Legendary)
+Temple of Odds: Win a match using each background once (Legendary)
+Lunar Blood Moon: Purchase: 5 SOL (Celestial)
+Immortal Temptation: Unlock every Easter eggs (Celestial)
+Dragon Paradise: Equip legendary items from all shop category and win 7 games in a row( Celestial)
+
+---
+
+ HIDDEN UNLOCKS (Easter Eggs):
+
+Nightshade Avatar FX: Click ghost in leaderboard (Rare)
+Glitch HUD Theme: Type /debug in chat (Rare)
+Key of Silence: Play 3 games with chat muted (Rare)
+Hidden Scroll Border: Scroll to bottom of settings page (Rare)
+Console Whisperer: Type /moonflip in browser console (Epic)
+Wall Walker Title: Scroll horizontally in a hidden zone (Epic)
+Reverse Fade HUD: Equip glitch HUD and refresh at 3am (Legendary)
+Void Breacher Coin: Bet 10 SOL three times in a row (Legendary)
+Night Owl FX: Visit site 5 times after midnight (Rare)
+404: Reality Glitch: View site at 4:04 AM, win, and type glitch in chat (Celestial)
+Inverted Crypto Coin: Get a 27 win streak in a game of moonflip (Celestial)
+
+---
+
+ CUSTOM HUD THEMES:
+
+Classic Noir: Default (Common)
+Gold Pulse: Purchase: 0.015 SOL (Common)
+Sakura Mist: Win Snake & Ladder (Rare)
+Glitch Flux: Unlock via error egg (Rare)
+Oracle HUD: Purchase: 0.025 SOL (Rare)
+Neon Blueprint: Refer site 3 times (Rare)
+Old Terminal: Purchase: 0.01 SOL (Common)
+Frozen Light: Loss streak of 4 (Common)
+Crimson Sparks: Purchase: 0.02 SOL (Rare)
+MistCore: Play 5 different games (Rare)
+Creator Mode: Unlock 100% shop items (Celestial)
+Ancient Protocol: Log in, spectate, win, purchase in 1 session (Legendary)
+
+make sure that each has their own unique icon in the shop
+
+
+
+
+
+---
+
+> Ensure everything is styled and made uniquely and perfectly befitting of their rearity (common, rare, epic, legendary, Celestial) and consistently with Nightfall Casino’s dreamy, mysterious anime-night aesthetic using Tailwind CSS and modular React components.
+Must be Vercel-compatible and cleanly organized for GitHub repo structure.
+
+Refactor and expand the current Nightfall Casino React + Tailwind project to be fully modular, production-ready, and Supabase-compatible for all backend functionality.
+
+Ensure clean GitHub structure and seamless Vercel deployment.
+
+
+
+
+---
+
+️ Supabase Backend Integration (Prepare for):
+
+Refactor the project structure and codebase to support the following Supabase-powered features:
+
+ Authentication
+
+Use wallet address as identity (non-email)
+
+Store:
+
+Wallet address
+
+Username (editable once)
+
+Connected at (timestamp)
+
+Is admin (boolean)
+
+Other necessary stuff
+
+
+
+ Game Data
+
+Tables:
+
+games: game_id, players, game_type, amount, outcome, timestamp
+
+bets: user, game_id, amount, won/lost, timestamp
+
+side_wagers: (only for Snake & Ladder)
+
+
+
+ Leaderboard
+
+Auto-track and calculate:
+
+Highest win streak
+
+Highest SOL staked (total & per game)
+
+Total wins, losses
+
+Win/loss ratio
+
+
+
+ Fee Logs
+
+Track every SOL fee sent to the admin wallet
+
+Fields: sender, game_id/shop_item, amount, timestamp
+
+
+ Shop System
+
+Tables:
+
+shop_items: id, name, category, price (SOL), rarity, unlock_condition
+
+user_unlocks: user_id, item_id, unlock_method, timestamp
+
+
+Allow items to be unlockable or purchasable
+
+Admin panel for item control
+
+
+ Unlock Conditions & Easter Eggs
+
+Track user milestones like:
+
+5 losses in a row
+
+Reaching #1 leaderboard
+
+Interacting with a chat command
+
+
+Store in unlock_events table for reference
+
+
+ Player Limits
+
+Track how many games a user has created or joined (max 3)
+
+Prevent further game creation if the limit is reached
+
+
+
+---
+
+ Frontend Code Preparation:
+
+Ensure the frontend is structured for seamless Supabase support:
+
+Use React Context or Zustand for wallet + user session state
+
+Create centralized API service for all Supabase calls
+
+Use .env for Supabase project URL and public anon key
+
+Create modular React components:
+
+Game cards
+
+Join/Create logic
+
+Admin UI widgets
+
+Shop UI
+
+Chat & Spectator modes
+
+
+
+
+---
+
+✅ Structural Requirements:
+
+Project should be clean and modular:
+
+/src
+  /components
+  /pages
+  /lib (for Supabase client + helpers)
+  /hooks
+  /styles
+  /context
+
+Tailwind fully configured, custom theme extensions for glow colors
+
+Include supabase.ts for preconfigured client
+
+Auto-detect wallet connection and trigger Supabase login logic
+
+Include documentation (README.md) for Supabase setup steps
+
+Make sure it's GitHub compatible 
+
+
+---
+
+ Hosting Notes:
+
+Ensure Vercel compatibility:
+
+No unsupported Node modules
+
+Use VITE_ prefix for all env variables
+
+
+Ensure GitHub repo is clean:
+
+Include .gitignore, README.md, LICENSE, and .env.example
+
+Continue building the Solana-based anime casino website Nightfall Casino. Integrate the following luck-based PVP games, all driven by player stakes, no admin-funded prizes, and deeply themed around a dreamy, night-city atmosphere inspired by Call of the Night.
+After a user has opened a game by themselves after betting their chosen amount of SOL (min 0.001 SOL) for other people to join, they can not cancel the game at will, but they can cancel the game and receive their SOL (with transaction fee, no playing fee) after a 5 minute Timeframe that is displayed clearly for them, after the 5 minute is up the user can cancel the game and get his SOL back (with transaction fee)
+
+---
+
+ Games to Implement
+
+
+---
+
+1.  Moon Flip
+
+A Solana-themed coin flip:
+
+Moon = heads
+
+Star = tails
+
+
+Coin has a glowing outline, floats and flips slowly, with spark trails
+
+Winner gets both players' stakes minus a fee
+
+
+
+---
+
+2.  Dice Duel
+
+1v1 dice roll (1–100), higher roll wins the pot
+
+Dice glow and roll with soft bounce easing
+
+No sound spikes, just subtle dice-rolling ambiance
+
+
+
+---
+
+3.  Snake and Ladder (PVP Duel)
+
+Both players roll dice per turn
+
+Board and ladder/snake placements are:
+
+Random for every game
+
+Balanced to prevent unfair scenarios
+
+
+Board is vertical with glowing tiles, misty neon snakes, and golden ladders
+
+Movement has soft, snappy transitions with particle effects
+
+
+
+---
+
+4.  Wheel of Fate
+
+Players pick from unique segments before spin
+
+The wheel:
+
+Has mystical symbols (moons, stars, runes)
+
+Spins with a soft whir, light glows, and mist trails
+
+No high-energy audio buildup — all calm, atmospheric
+
+
+Winner is based on fair RNG
+
+
+
+---
+
+5.  Mine Flip
+
+Player A hides a bomb behind one of 3 panels
+
+Player B picks one
+
+If B avoids the bomb, B wins
+
+And if player B touches the bomb, player A wins
+
+Panel flip is slow, glowing, and cinematic
+
+Nightglass-style UI — soft, mysterious FX
+
+
+
+---
+
+6.  Mystery Box Duel
+
+Two glowing boxes — only one contains the SOL pot
+
+Both players pick; system reveals the winner box
+
+Make it fair and make sense 
+
+Suspense is visual (particle glow, mist), not audio-driven
+
+
+
+---
+
+7.  Roulette Lite
+
+1–12 tile wheel with glowing numerals
+
+Players pick a tile
+
+Wheel spins softly with glowing tail and smooth deceleration
+
+No dramatic sound — just light ambient SFX to match the vibe
+
+
+
+---
+
+ Game Rules & Logic (For All Games)
+
+Games are completely luck-based
+
+Stake loop logic:
+
+Players stake SOL
+
+Winner receives total pot minus a flat 0.0001 SOL fee
+
+
+No platform wallet pays out winnings
+
+Admin can:
+
+Adjust minimum bet (default: 0.001 SOL)
+
+Adjust fee amount
+
+Set/change fee destination wallet
+
+
+
+
+---
+
+ Visual, UX & Sound Design
+
+Apply consistently across all games:
+
+Visuals: dark purples, navy, gold accents, glowing outlines
+
+Animation: smooth, floating, neon-inspired transitions
+
+Sound:
+
+No loud builds or arcade FX
+
+Use ambient night sounds, soft win tones, gentle hover FX
+
+
+Chat & UI: toast notifications, streak effects, glowing badges
+
+Fully responsive, optimized for Vercel deployment
+
+Use Tailwind CSS + React, modular component structure
+
+
+
+---
+
+> Add these seven unique luck-based games to Nightfall Casino, themed deeply around nighttime, subtle animation, immersive visuals, and soft atmosphere. Make the experience addictive but calm — like gambling beneath the stars.
+
+Update the following games to allow both 1v1 duels and optional group mode, depending on how players choose to set up or join games.
+
+
+---
+
+ Roulette Lite
+
+>  A glowing, simplified roulette game themed for Nightfall’s anime-night aesthetic.
+
+
+
+Player count: 2–6
+
+Duel Mode (1v1):
+
+Each player picks two numbers (e.g., 2 & 7)
+
+If a chosen number hits, that player wins
+
+
+Group Mode (3–6 players):
+
+All players pick 2 unique numbers
+
+The wheel spins and lands on 1 of 12 glowing segments
+
+The winner receives the entire pot (minus 0.0001 SOL fee)
+
+If no player wins, reroll with a glowing suspense animation
+
+
+
+> ✨ Add a button to "Play with 2 Players" or "Start Group Game" when creating a room
+ Add a 15-second countdown when lobby is full or 6 players have joined
+
+
+
+
+---
+
+ Mystery Box Duel
+
+>  Suspense game where players pick one box — only one contains the winnings.
+
+
+
+Player count: 3–5
+
+Each player selects one mystery box (UI: floating glowing boxes, randomized location)
+
+One box holds the entire prize pot
+
+All others are empty
+
+The winning player receives the full pool minus fee
+
+If no one picks the right box (optional edge case), they can continue the game with new boxes
+
+Boxes flip open one at a time with slow glow and reveal effect
+
+
+>  Animate all the box flips slowly for added tension
+ Boxes shimmer and pulse as hover effects
+
+
+
+
+---
+
+♻️ Unified Multiplayer System (Applies to All Games)
+
+Show player count allowed for each game:
+
+e.g. Dice Duel (2 Players), Roulette Lite (2–6), Mystery Box (3–5)
+
+
+For every game:
+
+Allow users to either Create Private Game or Join Public Game
+
+Display real-time "players in room" counter
+
+Start game automatically when minimum players reached + countdown expires
+
+
+
+
+---
+
+⚙️ Payout Structure for Multiplayer
+
+All players stake the same fixed amount (minimum: 0.001 SOL)
+
+One winner receives:
+
+Total pool – 0.0001 SOL playing fee based on how many players joined
+
+Example: if 5 people were to play a game and one of them wins, the playing fee will be 0.0005 SOL 
+
+
+Playing fee goes to admin wallet (adjustable via Admin Panel)
+
+In 1v1, winner gets the other player’s stake (same logic)
+
+ Gameplay
+
+Streak-Based Betting Buffs
+Visual-only effects (glows, badges) during gameplay and leaderboard when a user is on a win streak.
+
+Side Wagers for Snake & Ladder
+Spectators can bet small SOL amounts on who they think will win — payouts go to correct betters from losing bet pool.
+
+Spectate Mode (Optimized)
+Allow users to watch ongoing Snake & Ladder games with synced moves, chat, and effects (no performance drop).
+
+
+
+---
+
+ UI & Cosmetic
+
+Live Leaderboard Animations
+Top 3 glow and animate in real-time as stats update (position shuffle, particle glow, streak flare).
+
+Custom HUD Themes
+Unlockable visual skins for game UI (e.g., Sakura, Glitch Neon, Gold Noir) via the shop.
+
+Unique Favicon/Icon
+Custom moon/star/night-themed site icon visible in tabs and bookmarks.
+
+
+
+---
+
+ Security & Admin
+
+Fairness Provably System
+Display verifiable randomness using Solana hash signatures or third-party randomness oracle (e.g., switchboard.xyz).
+
+Revenue Dashboard
+Admin panel section showing:
+
+SOL earned by category (games, shop, fees)
+
+Daily/weekly summaries
+
+Top spenders
+
+Export to CSV
+
+
+
+
+---
+
+ UX & UI Rules (Group Mode Only)
+
+Use a night lounge lobby UI where avatars or wallet initials float around until game starts
+
+Leaderboard icons or badges glow based on past wins
+
+Animate the winning result (roulette roll, box reveal) only after all choices are locked in
+
+Sound must remain soft and ambient — no hype or arcade sounds
+
+
+Add the following enhanced features to the existing Nightfall Casino codebase:
+
+
+---
+
+ Playing Fee System:
+
+Set the default playing fee to 0.0001 SOL.
+
+Automatically estimate and deduct Solana transaction (network) fees from the winner's payout before the fee is sent.
+
+Do not charge losing players.
+
+All fees must be transferred to the admin-designated wallet:
+
+> GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb
+
+
+
+Backend must log all:
+
+Amounts deducted
+
+Source game
+
+Time/date
+
+Wallet involved
+
+
+
+
+---
+
+ Admin Fee + Control Wallet:
+
+Treat GH7dc4Wihg79nWFCCJH4NUcE368zXkWhgsDTEbWup7Eb as:
+
+The sole admin wallet for dashboard access
+
+The fee collector wallet for all game fees and shop SOL purchases
+
+
+
+
+---
+
+> Add dual support for 1v1 and group-based games in Nightfall Casino.
+All game logic must support a looped payout: winners are always paid from losing player stakes. No admin funds are ever used.
+"Please create and add proper images or visual assets for each game on the site:
+
+Moon Flip (a glowing moon vs a glowing star)
+
+Dice Duel (glowing dice)
+
+Snake & Ladder (a neon snake and golden ladder)
+
+Wheel of Fate (mystical glowing wheel)
+
+Mystery Box Duel (glowing mystery boxes)
+
+Mine Flip (mysterious glowing panels)
+
+Roulette Lite (neon-style 12-slot wheel)
+
+
+Use dark, anime-night-themed visuals that fit the Call of the Night aesthetic.
+Add these images to the UI where games are listed, so each game has a preview image or banner."
